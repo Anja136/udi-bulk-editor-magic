@@ -5,7 +5,9 @@ import { FilterOption, createColumnFilter } from '@/lib/filterUtils';
 import ActiveFilters from './UDITable/ActiveFilters';
 import SheetTabs from './UDITable/SheetTabs';
 import { useUDITable } from '@/hooks/useUDITable';
-import { FileText, List } from 'lucide-react';
+import { FileText, List, PencilLine } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import BulkEditDialog from './UDITable/BulkEditDialog';
 
 interface UDIDataTableProps {
   data: UDIRecord[];
@@ -67,7 +69,7 @@ const UDIDataTable = ({
 
   return (
     <div className="w-full space-y-4">
-      {activeFilters && activeFilters.length > 0 && (
+      {activeFilters && activeFilters.length > 0 ? (
         <ActiveFilters 
           activeFilters={activeFilters}
           columns={columns}
@@ -76,6 +78,15 @@ const UDIDataTable = ({
           onClearAllFilters={() => onFilterChange?.([])}
           onDataChange={handleBulkUpdate}
         />
+      ) : (
+        <div className="flex justify-end mb-3">
+          <BulkEditDialog 
+            filteredRecords={records}
+            columns={columns}
+            activeFilters={[]}
+            onRecordsUpdate={handleBulkUpdate}
+          />
+        </div>
       )}
       
       <SheetTabs
