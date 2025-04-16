@@ -3,6 +3,7 @@ import React from 'react';
 import { UDIRecord, UDITableColumn } from '@/types/udi';
 import FrozenColumns from './FrozenColumns';
 import ScrollableColumns from './ScrollableColumns';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface DataTableContentProps {
   frozenColumns: UDITableColumn[];
@@ -39,7 +40,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
 }) => {
   return (
     <div className="border rounded-md">
-      <div className="overflow-auto">
+      <ScrollArea className="h-[calc(100vh-320px)]">
         <div className="flex flex-row w-full">
           <FrozenColumns
             columns={frozenColumns}
@@ -72,7 +73,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
             activeFilters={activeFilters}
           />
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 };

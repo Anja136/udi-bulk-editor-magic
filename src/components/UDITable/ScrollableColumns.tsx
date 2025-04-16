@@ -33,21 +33,22 @@ const ScrollableColumns: React.FC<ScrollableColumnsProps> = ({
   activeFilters
 }) => {
   return (
-    <TableContent
-      columns={columns}
-      records={records}
-      editingCell={editingCell}
-      editValue={editValue}
-      onStartEditing={onStartEditing}
-      onEditValueChange={onEditValueChange}
-      onSave={onSave}
-      onCancel={onCancel}
-      isColumnFiltered={isColumnFiltered}
-      onApplyFilter={onApplyFilter}
-      onClearFilter={onClearFilter}
-      activeFilters={activeFilters}
-      className="overflow-x-auto"
-    />
+    <div className="flex-1 overflow-x-auto">
+      <TableContent
+        columns={columns}
+        records={records}
+        editingCell={editingCell}
+        editValue={editValue}
+        onStartEditing={onStartEditing}
+        onEditValueChange={onEditValueChange}
+        onSave={onSave}
+        onCancel={onCancel}
+        isColumnFiltered={isColumnFiltered}
+        onApplyFilter={onApplyFilter}
+        onClearFilter={onClearFilter}
+        activeFilters={activeFilters}
+      />
+    </div>
   );
 };
 

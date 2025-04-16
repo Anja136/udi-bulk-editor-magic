@@ -52,8 +52,8 @@ const TableContent: React.FC<TableContentProps> = ({
             {columns.map((column) => (
               <TableHead 
                 key={column.key} 
-                style={{ width: column.width }}
-                className={renderActions ? "sticky left-0 z-20 bg-muted/50" : ""}
+                style={{ width: column.width, minWidth: column.width }}
+                className={column.frozen ? "sticky left-0 z-20 bg-muted/50" : ""}
               >
                 {renderHeader ? renderHeader(column) : (
                   <div className="flex items-center justify-between">
@@ -94,7 +94,8 @@ const TableContent: React.FC<TableContentProps> = ({
                 {columns.map((column) => (
                   <TableCell 
                     key={`${record.id}-${column.key}`}
-                    className={renderActions ? "sticky left-0 z-20 bg-background" : ""}
+                    style={{ width: column.width, minWidth: column.width }}
+                    className={column.frozen ? "sticky left-0 z-20 bg-background" : ""}
                   >
                     <EditableCell
                       record={record}
