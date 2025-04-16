@@ -48,6 +48,10 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
   onClearFilter,
   activeFilters
 }) => {
+  // Count the number of records with issues
+  const invalidCount = records.filter(r => r.status === 'invalid').length;
+  const warningCount = records.filter(r => r.status === 'warning').length;
+  
   return (
     <Tabs value={activeSheet} onValueChange={setActiveSheet} className="w-full">
       <div className="flex items-center justify-between mb-4">
@@ -56,6 +60,13 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
             <TabsTrigger key={sheet.id} value={sheet.id} className="flex items-center gap-2">
               {sheet.icon}
               {sheet.name}
+              {sheet.id === 'basic' && (invalidCount > 0 || warningCount > 0) && (
+                <span className={`ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full ${
+                  invalidCount > 0 ? 'bg-error/20 text-error' : 'bg-warning/20 text-warning'
+                }`}>
+                  {invalidCount > 0 ? invalidCount : warningCount}
+                </span>
+              )}
             </TabsTrigger>
           ))}
         </TabsList>

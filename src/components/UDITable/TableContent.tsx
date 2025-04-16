@@ -84,7 +84,7 @@ const TableContent: React.FC<TableContentProps> = ({
             </TableRow>
           ) : (
             records.map((record) => (
-              <TableRow key={`table-row-${record.id}`} className={record.status === 'invalid' ? 'bg-error/5' : record.status === 'warning' ? 'bg-warning/5' : ''}>
+              <TableRow key={`table-row-${record.id}`} className="bg-background">
                 {renderActions && (
                   <TableCell className="text-center sticky left-0 z-20 bg-background h-12 py-0">
                     {renderActions(record)}

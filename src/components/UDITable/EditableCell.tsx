@@ -2,7 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Save, AlertCircle, Check, X } from 'lucide-react';
+import { Edit, Save, AlertCircle, X } from 'lucide-react';
 import { UDIRecord } from '@/types/udi';
 import StatusBadge from './StatusBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -99,7 +99,7 @@ const EditableCell = ({
   const isEditable = column !== 'status' && !record.isLocked;
   const cellValue = String(record[column as keyof UDIRecord] || '');
   
-  // Check if this field has errors
+  // Check if this specific field has errors
   const hasError = record.status === 'invalid' && 
     record.errors && 
     record.errors.some(err => err.toLowerCase().includes(column.toLowerCase()));
@@ -109,36 +109,53 @@ const EditableCell = ({
     record.warnings && 
     record.warnings.some(warn => warn.toLowerCase().includes(column.toLowerCase()));
 
-  // If there's an error or warning for this cell, show it with a tooltip
-  if (hasError || hasWarning) {
-    const relevantMessages = hasError 
-      ? record.errors?.filter(err => err.toLowerCase().includes(column.toLowerCase()))
-      : record.warnings?.filter(warn => warn.toLowerCase().includes(column.toLowerCase()));
-    
+  // Get the specific messages related to this field
+  const getFieldErrors = () => {
+    if (hasError && record.errors) {
+      return record.errors.filter(err => err.toLowerCase().includes(column.toLowerCase()));
+    }
+    if (hasWarning && record.warnings) {
+      return record.warnings.filter(warn => warn.toLowerCase().includes(column.toLowerCase()));
+    }
+    return [];
+  };
+
+  const fieldMessages = getFieldErrors();
+
+  // If there's an error or warning for this specific cell, show it with a tooltip
+  if (fieldMessages.length > 0) {
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <div
-              className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''} ${hasError ? 'border-l-4 border-error' : 'border-l-4 border-warning'}`}
+              className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
               onClick={isEditable ? onStartEditing : undefined}
             >
-              <div className="flex items-center w-full">
-                <span className={`truncate ${hasError ? 'text-error font-medium' : 'text-warning font-medium'}`}>
+              <div className="flex items-center w-full pl-1">
+                <span className={`mr-2 ${hasError ? 'text-error' : 'text-warning'}`}>
                   {cellValue}
                 </span>
                 {hasError ? (
-                  <AlertCircle className="h-4 w-4 ml-1 text-error" />
+                  <AlertCircle className="h-4 w-4 text-error flex-shrink-0" />
                 ) : (
-                  <AlertCircle className="h-4 w-4 ml-1 text-warning" />
+                  <AlertCircle className="h-4 w-4 text-warning flex-shrink-0" />
                 )}
               </div>
             </div>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent className={hasError ? "bg-error/10 border-error" : "bg-warning/10 border-warning"}>
             <div className="max-w-xs">
-              {relevantMessages?.map((message, idx) => (
-                <div key={idx} className="text-xs">{message}</div>
+              <div className="text-sm font-medium mb-1">{hasError ? 'Error:' : 'Warning:'}</div>
+              {fieldMessages.map((message, idx) => (
+                <div key={idx} className="text-xs flex items-start gap-1">
+                  {hasError ? (
+                    <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                  )}
+                  <span>{message}</span>
+                </div>
               ))}
             </div>
           </TooltipContent>
