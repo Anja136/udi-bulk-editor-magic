@@ -50,7 +50,7 @@ const GMDNSheet = ({ records }: GMDNSheetProps) => {
           ...record,
           gmdnCode: editCode,
           gmdnTerm: editTerm,
-          status: 'valid'
+          status: 'valid' as const  // Use as const to ensure type safety
         };
       }
       return record;
