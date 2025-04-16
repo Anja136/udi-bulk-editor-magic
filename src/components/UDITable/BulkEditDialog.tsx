@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { UDIRecord, UDITableColumn } from '@/types/udi';
 import { validateRecord } from '@/lib/validators';
 import { FilterOption } from '@/lib/filterUtils';
@@ -31,6 +32,14 @@ const BulkEditDialog = ({
   // Only show editable columns
   const editableColumns = columns.filter(col => col.editable);
 
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedField("");
+      setNewValue("");
+    }
+  }, [open]);
+
   const handleApplyChanges = () => {
     if (!selectedField) return;
 
@@ -42,19 +51,20 @@ const BulkEditDialog = ({
       // Skip locked records
       if (record.isLocked) return record;
 
-      // Get the appropriate value based on the field type
-      let valueToSet = newValue;
+      // Create a deep copy of the record to avoid mutations
+      const updatedRecord = { ...record };
       
-      // For boolean fields, convert "YES"/"NO" strings to boolean values
+      // Handle different field types
       if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(selectedField)) {
-        valueToSet = newValue === "YES" ? "true" : "false";
+        // For boolean fields
+        updatedRecord[selectedField as keyof UDIRecord] = newValue === "YES";
+      } else if (selectedField === 'status') {
+        // For status field (which is an enum)
+        updatedRecord.status = newValue as any;
+      } else {
+        // For all other fields (strings, numbers, dates)
+        updatedRecord[selectedField as keyof UDIRecord] = newValue as any;
       }
-
-      // Update the selected field for unlocked records
-      const updatedRecord = {
-        ...record,
-        [selectedField]: valueToSet
-      };
 
       // Validate the record with the new value
       return validateRecord(updatedRecord);
@@ -69,8 +79,6 @@ const BulkEditDialog = ({
     });
     
     setOpen(false);
-    setNewValue("");
-    setSelectedField("");
   };
 
   // Display a message with the number of records that will be affected
@@ -81,6 +89,29 @@ const BulkEditDialog = ({
 
   // Is the selected field a boolean type?
   const isBooleanField = ['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(selectedField);
+  
+  // Determine if the field is a date type
+  const isDateField = ['productionDate', 'expirationDate'].includes(selectedField);
+
+  // Is the field a multiline text field?
+  const isMultilineField = false; // Add any multiline fields here if needed
+
+  // Active filters display
+  const renderActiveFilters = () => {
+    if (activeFilters.length === 0) return null;
+    
+    return (
+      <div className="mt-2 text-xs p-2 bg-muted rounded-sm">
+        <span className="font-semibold">Active filters: </span>
+        {activeFilters.map((filter, idx) => (
+          <span key={idx}>
+            {columns.find(c => c.key === filter.column)?.label || filter.column}: {filter.value}
+            {idx < activeFilters.length - 1 ? ', ' : ''}
+          </span>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -98,17 +129,7 @@ const BulkEditDialog = ({
           <DialogTitle>Bulk Edit Records</DialogTitle>
           <DialogDescription>
             Change values for all {filteredRecords.length} filtered records at once.
-            {activeFilters.length > 0 && (
-              <div className="mt-2 text-xs p-2 bg-muted rounded-sm">
-                <span className="font-semibold">Active filters: </span>
-                {activeFilters.map((filter, idx) => (
-                  <span key={idx}>
-                    {columns.find(c => c.key === filter.column)?.label || filter.column}: {filter.value}
-                    {idx < activeFilters.length - 1 ? ', ' : ''}
-                  </span>
-                ))}
-              </div>
-            )}
+            {renderActiveFilters()}
           </DialogDescription>
         </DialogHeader>
 
@@ -156,6 +177,25 @@ const BulkEditDialog = ({
                   <SelectItem value="NO">NO</SelectItem>
                 </SelectContent>
               </Select>
+            ) : isDateField ? (
+              <Input
+                id="value"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                className="col-span-3"
+                disabled={!selectedField}
+                type="date"
+                placeholder="YYYY-MM-DD"
+              />
+            ) : isMultilineField ? (
+              <Textarea
+                id="value"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                className="col-span-3 min-h-[80px]"
+                disabled={!selectedField}
+                placeholder="Enter value..."
+              />
             ) : (
               <Input
                 id="value"
@@ -163,6 +203,7 @@ const BulkEditDialog = ({
                 onChange={(e) => setNewValue(e.target.value)}
                 className="col-span-3"
                 disabled={!selectedField}
+                placeholder="Enter value..."
               />
             )}
           </div>

@@ -37,22 +37,24 @@ const GMDNSheet: React.FC<GMDNSheetProps> = ({ records }) => {
         />
         
         <div className="border rounded-md overflow-hidden">
-          <ScrollArea className="h-[calc(100vh-380px)]" orientation="vertical">
-            <GMDNSheetTable
-              selectedDevice={selectedDevice}
-              gmdnRecords={filteredGMDNRecords}
-              editingRecord={editingRecord}
-              editCode={editCode}
-              editTerm={editTerm}
-              onAddGMDN={handleAddGMDN}
-              onEditGMDN={handleEditGMDN}
-              onSaveGMDN={handleSaveGMDN}
-              onDeleteGMDN={handleDeleteGMDN}
-              onCancelEditing={cancelEditing}
-              onEditCodeChange={setEditCode}
-              onEditTermChange={setEditTerm}
-            />
-          </ScrollArea>
+          <div className="h-[calc(100vh-380px)] relative">
+            <ScrollArea className="h-full" scrollHide={false}>
+              <GMDNSheetTable
+                selectedDevice={selectedDevice}
+                gmdnRecords={filteredGMDNRecords}
+                editingRecord={editingRecord}
+                editCode={editCode}
+                editTerm={editTerm}
+                onAddGMDN={handleAddGMDN}
+                onEditGMDN={handleEditGMDN}
+                onSaveGMDN={handleSaveGMDN}
+                onDeleteGMDN={handleDeleteGMDN}
+                onCancelEditing={cancelEditing}
+                onEditCodeChange={setEditCode}
+                onEditTermChange={setEditTerm}
+              />
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </div>

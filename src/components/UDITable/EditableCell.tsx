@@ -51,6 +51,31 @@ const EditableCell = ({
         </div>
       );
     }
+    
+    // Special handling for date values
+    if (['productionDate', 'expirationDate'].includes(column)) {
+      return (
+        <div className="flex items-center space-x-1 h-full">
+          <Input
+            type="date"
+            value={editValue}
+            onChange={(e) => onEditValueChange(e.target.value)}
+            className="h-8 w-full"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onSave();
+              if (e.key === 'Escape') onCancel();
+            }}
+          />
+          <Button variant="ghost" size="icon" onClick={onSave} title="Save">
+            <Save className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onCancel} title="Cancel">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      );
+    }
 
     // Regular editing for non-boolean values
     return (
@@ -92,6 +117,29 @@ const EditableCell = ({
         <span className={`font-medium ${isChecked ? 'text-green-600' : 'text-red-600'}`}>
           {isChecked ? 'YES' : 'NO'}
         </span>
+      </div>
+    );
+  }
+
+  // Handle date fields
+  if (['productionDate', 'expirationDate'].includes(column)) {
+    const dateValue = record[column as keyof UDIRecord] as string;
+    const isEditable = !record.isLocked;
+    
+    // Format date for display if needed
+    const displayDate = dateValue || '';
+    
+    return (
+      <div
+        className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
+        onClick={isEditable ? onStartEditing : undefined}
+      >
+        <div className="flex items-center w-full">
+          <span className="truncate">{displayDate}</span>
+          {isEditable && (
+            <Edit className="h-3 w-3 ml-1 text-muted-foreground opacity-50" />
+          )}
+        </div>
       </div>
     );
   }

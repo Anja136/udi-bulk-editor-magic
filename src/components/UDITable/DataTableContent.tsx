@@ -69,40 +69,42 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
       )}
       
       <div className="border rounded-md overflow-hidden">
-        <ScrollArea className="h-[calc(100vh-400px)]" orientation="both">
-          <div className="flex flex-row w-full min-w-full">
-            <FrozenColumns
-              columns={frozenColumns}
-              records={records}
-              editingCell={editingCell}
-              editValue={editValue}
-              onStartEditing={onStartEditing}
-              onEditValueChange={onEditValueChange}
-              onSave={onSave}
-              onCancel={onCancel}
-              onToggleLock={onToggleLock}
-              isColumnFiltered={isColumnFiltered}
-              onApplyFilter={onApplyFilter}
-              onClearFilter={onClearFilter}
-              activeFilters={activeFilters}
-            />
-            
-            <ScrollableColumns
-              columns={scrollableColumns}
-              records={records}
-              editingCell={editingCell}
-              editValue={editValue}
-              onStartEditing={onStartEditing}
-              onEditValueChange={onEditValueChange}
-              onSave={onSave}
-              onCancel={onCancel}
-              isColumnFiltered={isColumnFiltered}
-              onApplyFilter={onApplyFilter}
-              onClearFilter={onClearFilter}
-              activeFilters={activeFilters}
-            />
-          </div>
-        </ScrollArea>
+        <div className="h-[calc(100vh-400px)] relative">
+          <ScrollArea className="h-full" scrollHide={false}>
+            <div className="flex flex-row w-full min-w-full">
+              <FrozenColumns
+                columns={frozenColumns}
+                records={records}
+                editingCell={editingCell}
+                editValue={editValue}
+                onStartEditing={onStartEditing}
+                onEditValueChange={onEditValueChange}
+                onSave={onSave}
+                onCancel={onCancel}
+                onToggleLock={onToggleLock}
+                isColumnFiltered={isColumnFiltered}
+                onApplyFilter={onApplyFilter}
+                onClearFilter={onClearFilter}
+                activeFilters={activeFilters}
+              />
+              
+              <ScrollableColumns
+                columns={scrollableColumns}
+                records={records}
+                editingCell={editingCell}
+                editValue={editValue}
+                onStartEditing={onStartEditing}
+                onEditValueChange={onEditValueChange}
+                onSave={onSave}
+                onCancel={onCancel}
+                isColumnFiltered={isColumnFiltered}
+                onApplyFilter={onApplyFilter}
+                onClearFilter={onClearFilter}
+                activeFilters={activeFilters}
+              />
+            </div>
+          </ScrollArea>
+        </div>
       </div>
     </div>
   );

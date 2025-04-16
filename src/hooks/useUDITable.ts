@@ -17,6 +17,7 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
   const [activeSheet, setActiveSheet] = useState<string>('basic');
 
   useEffect(() => {
+    // This ensures records state is always in sync with the filtered data
     setRecords(data);
   }, [data]);
 
@@ -44,7 +45,15 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
     if (record.isLocked) return;
     
     setEditingCell({ rowId: record.id, column });
-    setEditValue(record[column as keyof UDIRecord]?.toString() || '');
+    
+    // Format the value based on type
+    if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(column)) {
+      // For boolean fields, use "true" or "false" string
+      setEditValue(String(record[column as keyof UDIRecord]));
+    } else {
+      // For all other fields
+      setEditValue(record[column as keyof UDIRecord]?.toString() || '');
+    }
   };
 
   const handleSave = () => {
@@ -53,10 +62,20 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
     const { rowId, column } = editingCell;
     const updatedRecords = records.map(record => {
       if (record.id === rowId) {
-        const updatedRecord = {
-          ...record,
-          [column]: editValue
-        };
+        const updatedRecord = { ...record };
+        
+        // Apply the value based on type
+        if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(column)) {
+          // For boolean fields, convert "true"/"false" strings to boolean values
+          updatedRecord[column as keyof UDIRecord] = editValue === "true";
+        } else if (['productionDate', 'expirationDate'].includes(column)) {
+          // For date fields
+          updatedRecord[column as keyof UDIRecord] = editValue as any;
+        } else {
+          // For all other fields
+          updatedRecord[column as keyof UDIRecord] = editValue as any;
+        }
+        
         return validateRecord(updatedRecord);
       }
       return record;
