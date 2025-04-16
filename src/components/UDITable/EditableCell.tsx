@@ -30,7 +30,7 @@ const EditableCell = ({
 }: EditableCellProps) => {
   if (isEditing) {
     return (
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center space-x-1 h-full">
         <Input
           value={editValue}
           onChange={(e) => onEditValueChange(e.target.value)}
@@ -61,7 +61,7 @@ const EditableCell = ({
     const isEditable = !record.isLocked;
     
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center h-full">
         {isEditable ? (
           <Switch 
             checked={isChecked} 
@@ -86,7 +86,7 @@ const EditableCell = ({
 
   return (
     <div
-      className={`flex items-center ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
+      className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
       onClick={isEditable ? onStartEditing : undefined}
     >
       <div className="flex items-center w-full">

@@ -46,14 +46,14 @@ const TableContent: React.FC<TableContentProps> = ({
         <TableHeader className="bg-muted/50">
           <TableRow>
             {renderActions && (
-              <TableHead className="w-12 text-center sticky left-0 z-20 bg-muted/50">Actions</TableHead>
+              <TableHead className="w-12 text-center sticky left-0 z-20 bg-muted/50 h-12">Actions</TableHead>
             )}
             
             {columns.map((column) => (
               <TableHead 
                 key={column.key} 
                 style={{ width: column.width, minWidth: column.width }}
-                className={column.frozen ? "sticky left-0 z-20 bg-muted/50" : ""}
+                className={column.frozen ? "sticky left-0 z-20 bg-muted/50 h-12" : "h-12"}
               >
                 {renderHeader ? renderHeader(column) : (
                   <div className="flex items-center justify-between">
@@ -86,7 +86,7 @@ const TableContent: React.FC<TableContentProps> = ({
             records.map((record) => (
               <TableRow key={`table-row-${record.id}`} className={record.status === 'invalid' ? 'bg-error/5' : record.status === 'warning' ? 'bg-warning/5' : ''}>
                 {renderActions && (
-                  <TableCell className="text-center sticky left-0 z-20 bg-background">
+                  <TableCell className="text-center sticky left-0 z-20 bg-background h-12 py-0">
                     {renderActions(record)}
                   </TableCell>
                 )}
@@ -95,7 +95,7 @@ const TableContent: React.FC<TableContentProps> = ({
                   <TableCell 
                     key={`${record.id}-${column.key}`}
                     style={{ width: column.width, minWidth: column.width }}
-                    className={column.frozen ? "sticky left-0 z-20 bg-background" : ""}
+                    className={column.frozen ? "sticky left-0 z-20 bg-background h-12 py-0" : "h-12 py-0"}
                   >
                     <EditableCell
                       record={record}
