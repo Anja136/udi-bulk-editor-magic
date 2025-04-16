@@ -103,7 +103,7 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
   };
 
   // Column filtering functions
-  const isColumnFiltered = (column: keyof UDIRecord) => {
+  const isColumnFiltered = (column: string) => {
     return activeFilters?.some(filter => filter.column === column) || false;
   };
 
@@ -120,19 +120,7 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
     setEditValue,
     handleSave,
     cancelEditing: () => setEditingCell(null),
-    toggleLock: (id: string) => {
-      const updatedRecords = records.map(record => {
-        if (record.id === id) {
-          return { ...record, isLocked: !record.isLocked };
-        }
-        return record;
-      });
-      
-      setRecords(updatedRecords);
-      onDataChange(updatedRecords);
-    },
-    isColumnFiltered: (column: keyof UDIRecord) => {
-      return activeFilters?.some(filter => filter.column === column) || false;
-    },
+    toggleLock,
+    isColumnFiltered,
   };
 };

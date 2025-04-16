@@ -14,10 +14,10 @@ interface TableContentProps {
   onEditValueChange: (value: string) => void;
   onSave: () => void;
   onCancel: () => void;
-  isColumnFiltered: (column: keyof UDIRecord) => boolean;
-  onApplyFilter: (column: keyof UDIRecord, value: string) => void;
-  onClearFilter: (column: keyof UDIRecord) => void;
-  activeFilters?: { column: keyof UDIRecord; value: string }[];
+  isColumnFiltered: (column: string) => boolean;
+  onApplyFilter: (column: string, value: string) => void;
+  onClearFilter: (column: string) => void;
+  activeFilters?: { column: string; value: string }[];
   className?: string;
   renderHeader?: (column: UDITableColumn) => React.ReactNode;
   renderActions?: (record: UDIRecord) => React.ReactNode;
@@ -77,11 +77,11 @@ const TableContent: React.FC<TableContentProps> = ({
                       {column.required && <span className="text-error"> *</span>}
                     </div>
                     <ColumnFilter
-                      column={column.key as keyof UDIRecord}
+                      column={column.key.toString()}
                       records={records}
                       onApplyFilter={onApplyFilter}
                       onClearFilter={onClearFilter}
-                      isFiltered={isColumnFiltered(column.key as keyof UDIRecord)}
+                      isFiltered={isColumnFiltered(column.key.toString())}
                       currentValue={activeFilters?.find(f => f.column === column.key)?.value}
                     />
                   </div>
@@ -107,7 +107,7 @@ const TableContent: React.FC<TableContentProps> = ({
                 )}
                 
                 {columns.map((column) => {
-                  const errorStatus = getCellErrorStatus(record, column.key);
+                  const errorStatus = getCellErrorStatus(record, column.key.toString());
                   
                   return (
                     <TableCell 

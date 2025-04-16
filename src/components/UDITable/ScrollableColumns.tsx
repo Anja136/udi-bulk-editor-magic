@@ -12,10 +12,10 @@ interface ScrollableColumnsProps {
   onEditValueChange: (value: string) => void;
   onSave: () => void;
   onCancel: () => void;
-  isColumnFiltered: (column: keyof UDIRecord) => boolean;
-  onApplyFilter: (column: keyof UDIRecord, value: string) => void;
-  onClearFilter: (column: keyof UDIRecord) => void;
-  activeFilters?: { column: keyof UDIRecord; value: string }[];
+  isColumnFiltered: (column: string) => boolean;
+  onApplyFilter: (column: string, value: string) => void;
+  onClearFilter: (column: string) => void;
+  activeFilters?: { column: string; value: string }[];
 }
 
 const ScrollableColumns: React.FC<ScrollableColumnsProps> = ({

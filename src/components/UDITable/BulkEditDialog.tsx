@@ -150,7 +150,7 @@ const BulkEditDialog = ({
               </SelectTrigger>
               <SelectContent>
                 {editableColumns.map((column) => (
-                  <SelectItem key={column.key} value={column.key}>
+                  <SelectItem key={column.key} value={column.key.toString()}>
                     {column.label} {column.required && <span className="text-destructive">*</span>}
                   </SelectItem>
                 ))}

@@ -8,10 +8,10 @@ import { UDIRecord } from '@/types/udi';
 import { getUniqueColumnValues } from '@/lib/filterUtils';
 
 interface ColumnFilterProps {
-  column: keyof UDIRecord;
+  column: string;
   records: UDIRecord[];
-  onApplyFilter: (column: keyof UDIRecord, value: string) => void;
-  onClearFilter: (column: keyof UDIRecord) => void;
+  onApplyFilter: (column: string, value: string) => void;
+  onClearFilter: (column: string) => void;
   isFiltered: boolean;
   currentValue?: string;
 }

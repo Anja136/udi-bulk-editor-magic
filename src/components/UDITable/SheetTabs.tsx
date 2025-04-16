@@ -24,9 +24,9 @@ interface SheetTabsProps {
   onSave: () => void;
   onCancel: () => void;
   onToggleLock: (id: string) => void;
-  isColumnFiltered: (column: keyof UDIRecord) => boolean;
-  onApplyFilter: (column: keyof UDIRecord, value: string) => void;
-  onClearFilter: (column: keyof UDIRecord) => void;
+  isColumnFiltered: (column: string) => boolean;
+  onApplyFilter: (column: string, value: string) => void;
+  onClearFilter: (column: string) => void;
   activeFilters?: FilterOption[];
 }
 

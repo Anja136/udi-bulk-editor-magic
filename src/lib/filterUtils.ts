@@ -2,7 +2,7 @@
 import { UDIRecord } from '@/types/udi';
 
 export interface FilterOption {
-  column: keyof UDIRecord;
+  column: string; // Changed from keyof UDIRecord to string for compatibility
   value: string;
   operation: 'contains' | 'equals' | 'startsWith' | 'endsWith';
 }
@@ -32,7 +32,7 @@ export const filterRecords = (records: UDIRecord[], filters: FilterOption[]): UD
 };
 
 // Get unique values for a specific column in the records
-export const getUniqueColumnValues = (records: UDIRecord[], column: keyof UDIRecord): string[] => {
+export const getUniqueColumnValues = (records: UDIRecord[], column: string): string[] => {
   const valueSet = new Set<string>();
   
   records.forEach(record => {
@@ -46,7 +46,7 @@ export const getUniqueColumnValues = (records: UDIRecord[], column: keyof UDIRec
 };
 
 // Apply a quick filter for a specific column and value
-export const createColumnFilter = (column: keyof UDIRecord, value: string): FilterOption => {
+export const createColumnFilter = (column: string, value: string): FilterOption => {
   return {
     column,
     value,

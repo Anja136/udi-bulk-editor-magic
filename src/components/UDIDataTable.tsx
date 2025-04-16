@@ -44,7 +44,7 @@ const UDIDataTable = ({
   ];
 
   // Column filtering functions
-  const applyFilter = (column: keyof UDIRecord, value: string) => {
+  const applyFilter = (column: string, value: string) => {
     // Remove any existing filters for this column
     const otherFilters = activeFilters?.filter(f => f.column !== column) || [];
     
@@ -55,7 +55,7 @@ const UDIDataTable = ({
     onFilterChange?.([...otherFilters, newFilter]);
   };
 
-  const clearColumnFilter = (column: keyof UDIRecord) => {
+  const clearColumnFilter = (column: string) => {
     const updatedFilters = activeFilters?.filter(f => f.column !== column) || [];
     onFilterChange?.(updatedFilters);
   };

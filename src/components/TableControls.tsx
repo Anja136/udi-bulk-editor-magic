@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,11 +41,11 @@ const TableControls = ({
 }: TableControlsProps) => {
   const { toast } = useToast();
   const [showFilterPanel, setShowFilterPanel] = useState(false);
-  const [filterColumn, setFilterColumn] = useState<keyof UDIRecord>('modelNumber');
+  const [filterColumn, setFilterColumn] = useState<string>('modelNumber');
   const [filterOperation, setFilterOperation] = useState<FilterOption['operation']>('contains');
   const [filterValue, setFilterValue] = useState('');
 
-  const columnOptions: Array<{value: keyof UDIRecord; label: string}> = [
+  const columnOptions: Array<{value: string; label: string}> = [
     { value: 'deviceIdentifier', label: 'Device Identifier' },
     { value: 'manufacturerName', label: 'Manufacturer' },
     { value: 'productName', label: 'Product' },
@@ -230,7 +231,7 @@ const TableControls = ({
         <div className="p-4 border rounded-md space-y-4 bg-background/50">
           <div className="text-sm font-medium mb-2">Add Filter</div>
           <div className="flex flex-wrap gap-2">
-            <Select value={filterColumn as string} onValueChange={(value) => setFilterColumn(value as keyof UDIRecord)}>
+            <Select value={filterColumn} onValueChange={(value) => setFilterColumn(value)}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Column" />
               </SelectTrigger>

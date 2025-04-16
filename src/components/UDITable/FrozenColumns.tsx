@@ -15,10 +15,10 @@ interface FrozenColumnsProps {
   onSave: () => void;
   onCancel: () => void;
   onToggleLock: (id: string) => void;
-  isColumnFiltered: (column: keyof UDIRecord) => boolean;
-  onApplyFilter: (column: keyof UDIRecord, value: string) => void;
-  onClearFilter: (column: keyof UDIRecord) => void;
-  activeFilters?: { column: keyof UDIRecord; value: string }[];
+  isColumnFiltered: (column: string) => boolean;
+  onApplyFilter: (column: string, value: string) => void;
+  onClearFilter: (column: string) => void;
+  activeFilters?: { column: string; value: string }[];
 }
 
 const FrozenColumns: React.FC<FrozenColumnsProps> = ({
@@ -43,11 +43,11 @@ const FrozenColumns: React.FC<FrozenColumnsProps> = ({
         {column.required && <span className="text-error"> *</span>}
       </div>
       <ColumnFilter
-        column={column.key as keyof UDIRecord}
+        column={column.key.toString()}
         records={records}
         onApplyFilter={onApplyFilter}
         onClearFilter={onClearFilter}
-        isFiltered={isColumnFiltered(column.key as keyof UDIRecord)}
+        isFiltered={isColumnFiltered(column.key.toString())}
         currentValue={activeFilters?.find(f => f.column === column.key)?.value}
       />
     </div>
