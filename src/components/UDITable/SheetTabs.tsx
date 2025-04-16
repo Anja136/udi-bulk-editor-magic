@@ -51,8 +51,8 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
 }) => {
   return (
     <Tabs value={activeSheet} onValueChange={setActiveSheet} className="w-full">
-      <div className="flex items-center justify-between">
-        <TabsList>
+      <div className="flex items-center justify-between mb-4">
+        <TabsList className="flex-grow-0">
           {sheets.map(sheet => (
             <TabsTrigger key={sheet.id} value={sheet.id} className="flex items-center gap-2">
               {sheet.icon}
@@ -67,7 +67,7 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
         </Button>
       </div>
       
-      <TabsContent value="basic" className="mt-4">
+      <TabsContent value="basic" className="mt-2">
         <DataTableContent
           frozenColumns={frozenColumns}
           scrollableColumns={scrollableColumns}
@@ -86,7 +86,7 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
         />
       </TabsContent>
       
-      <TabsContent value="gmdn" className="mt-4">
+      <TabsContent value="gmdn" className="mt-2">
         <GMDNSheet records={records} />
       </TabsContent>
     </Tabs>

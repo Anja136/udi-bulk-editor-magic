@@ -70,11 +70,12 @@ const EditableCell = ({
               setTimeout(onSave, 0);
             }}
             disabled={!isEditable}
+            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
           />
         ) : (
-          <>
+          <div className="flex justify-center">
             {isChecked ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-muted-foreground" />}
-          </>
+          </div>
         )}
       </div>
     );

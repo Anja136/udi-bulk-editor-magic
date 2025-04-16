@@ -40,7 +40,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   return (
     <div className="border rounded-md">
       <div className="overflow-auto">
-        <div className="flex flex-row">
+        <div className="flex flex-row w-full">
           <FrozenColumns
             columns={frozenColumns}
             records={records}
