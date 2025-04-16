@@ -29,6 +29,7 @@ const ColumnFilter = ({
   
   const uniqueValues = getUniqueColumnValues(records, column);
   const [localSearchValue, setLocalSearchValue] = useState('');
+  const [open, setOpen] = useState(false);
   
   const filteredValues = !localSearchValue 
     ? uniqueValues 
@@ -36,8 +37,13 @@ const ColumnFilter = ({
         value.toLowerCase().includes(localSearchValue.toLowerCase())
       );
   
+  const handleClearFilter = () => {
+    onClearFilter(column);
+    setOpen(false);
+  };
+  
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button 
           variant="ghost" 
@@ -68,7 +74,10 @@ const ColumnFilter = ({
                   variant={currentValue === value ? "default" : "ghost"}
                   size="sm"
                   className="justify-start font-normal"
-                  onClick={() => onApplyFilter(column, value)}
+                  onClick={() => {
+                    onApplyFilter(column, value);
+                    setOpen(false);
+                  }}
                 >
                   {value}
                 </Button>
@@ -85,7 +94,7 @@ const ColumnFilter = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => onClearFilter(column)}
+              onClick={handleClearFilter}
             >
               Clear Filter
             </Button>

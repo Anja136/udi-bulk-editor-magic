@@ -24,7 +24,8 @@ const ActiveFilters = ({
   onClearAllFilters,
   onDataChange
 }: ActiveFiltersProps) => {
-  if (activeFilters.length === 0 && filteredRecords.length === 0) return null;
+  // Only render the component if there are active filters - filteredRecords check removed
+  if (activeFilters.length === 0) return null;
   
   return (
     <div className="flex flex-wrap gap-2 mb-3 p-2 bg-muted/30 rounded-md">
@@ -65,14 +66,16 @@ const ActiveFilters = ({
           </Button>
         )}
       </div>
-      <div className="flex items-center">
-        <BulkEditDialog 
-          filteredRecords={filteredRecords}
-          columns={columns}
-          activeFilters={activeFilters}
-          onRecordsUpdate={onDataChange}
-        />
-      </div>
+      {filteredRecords.length > 0 && (
+        <div className="flex items-center">
+          <BulkEditDialog 
+            filteredRecords={filteredRecords}
+            columns={columns}
+            activeFilters={activeFilters}
+            onRecordsUpdate={onDataChange}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -114,14 +114,16 @@ const UDIDataTable = ({
 
   return (
     <div className="w-full overflow-auto">
-      <ActiveFilters 
-        activeFilters={activeFilters}
-        columns={columns}
-        filteredRecords={records}
-        onClearColumnFilter={clearColumnFilter}
-        onClearAllFilters={() => onFilterChange?.([])}
-        onDataChange={handleBulkUpdate}
-      />
+      {activeFilters && activeFilters.length > 0 && (
+        <ActiveFilters 
+          activeFilters={activeFilters}
+          columns={columns}
+          filteredRecords={records}
+          onClearColumnFilter={clearColumnFilter}
+          onClearAllFilters={() => onFilterChange?.([])}
+          onDataChange={handleBulkUpdate}
+        />
+      )}
       
       <Table className="min-w-full">
         <TableHeader className="bg-muted/50">

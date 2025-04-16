@@ -8,7 +8,7 @@ export interface FilterOption {
 }
 
 export const filterRecords = (records: UDIRecord[], filters: FilterOption[]): UDIRecord[] => {
-  if (filters.length === 0) return records;
+  if (!filters || filters.length === 0) return records;
   
   return records.filter(record => {
     return filters.every(filter => {
