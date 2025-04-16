@@ -5,13 +5,14 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 import { cn } from "@/lib/utils"
 
 interface ScrollAreaProps extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
-  orientation?: "horizontal" | "vertical" | "both"
+  orientation?: "horizontal" | "vertical" | "both";
+  scrollHide?: boolean; // Add scrollHide property
 }
 
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
   ScrollAreaProps
->(({ className, children, orientation = "vertical", ...props }, ref) => (
+>(({ className, children, orientation = "vertical", scrollHide = true, ...props }, ref) => (
   <ScrollAreaPrimitive.Root
     ref={ref}
     className={cn("relative overflow-hidden", className)}
@@ -20,9 +21,15 @@ const ScrollArea = React.forwardRef<
     <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
       {children}
     </ScrollAreaPrimitive.Viewport>
-    <ScrollBar orientation={orientation === "both" ? "vertical" : orientation} />
+    <ScrollBar 
+      orientation={orientation === "both" ? "vertical" : orientation} 
+      className={scrollHide ? "transition-opacity opacity-0 group-hover:opacity-100" : ""} 
+    />
     {(orientation === "horizontal" || orientation === "both") && (
-      <ScrollBar orientation="horizontal" />
+      <ScrollBar 
+        orientation="horizontal" 
+        className={scrollHide ? "transition-opacity opacity-0 group-hover:opacity-100" : ""} 
+      />
     )}
     <ScrollAreaPrimitive.Corner />
   </ScrollAreaPrimitive.Root>

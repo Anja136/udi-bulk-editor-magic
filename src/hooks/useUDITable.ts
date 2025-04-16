@@ -49,10 +49,10 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
     // Format the value based on type
     if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(column)) {
       // For boolean fields, use "true" or "false" string
-      setEditValue(String(record[column as keyof UDIRecord]));
+      setEditValue(String(record[column]));
     } else {
       // For all other fields
-      setEditValue(record[column as keyof UDIRecord]?.toString() || '');
+      setEditValue(record[column]?.toString() || '');
     }
   };
 
@@ -67,13 +67,13 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
         // Apply the value based on type
         if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(column)) {
           // For boolean fields, convert "true"/"false" strings to boolean values
-          updatedRecord[column as keyof UDIRecord] = editValue === "true";
+          updatedRecord[column] = editValue === "true";
         } else if (['productionDate', 'expirationDate'].includes(column)) {
           // For date fields
-          updatedRecord[column as keyof UDIRecord] = editValue as any;
+          updatedRecord[column] = editValue;
         } else {
           // For all other fields
-          updatedRecord[column as keyof UDIRecord] = editValue as any;
+          updatedRecord[column] = editValue;
         }
         
         return validateRecord(updatedRecord);
@@ -119,8 +119,20 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
     startEditing,
     setEditValue,
     handleSave,
-    cancelEditing,
-    toggleLock,
-    isColumnFiltered,
+    cancelEditing: () => setEditingCell(null),
+    toggleLock: (id: string) => {
+      const updatedRecords = records.map(record => {
+        if (record.id === id) {
+          return { ...record, isLocked: !record.isLocked };
+        }
+        return record;
+      });
+      
+      setRecords(updatedRecords);
+      onDataChange(updatedRecords);
+    },
+    isColumnFiltered: (column: keyof UDIRecord) => {
+      return activeFilters?.some(filter => filter.column === column) || false;
+    },
   };
 };

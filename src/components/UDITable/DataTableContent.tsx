@@ -70,7 +70,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
       
       <div className="border rounded-md overflow-hidden">
         <div className="h-[calc(100vh-400px)] relative">
-          <ScrollArea className="h-full" scrollHide={false}>
+          <ScrollArea className="h-full" scrollHide={false} orientation="both">
             <div className="flex flex-row w-full min-w-full">
               <FrozenColumns
                 columns={frozenColumns}

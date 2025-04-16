@@ -1,4 +1,3 @@
-
 export interface UDIRecord {
   id: string;
   deviceIdentifier: string;
@@ -17,6 +16,7 @@ export interface UDIRecord {
   errors?: string[];
   warnings?: string[];
   isLocked: boolean;
+  [key: string]: any; // Add index signature to allow dynamic properties
 }
 
 export interface UDITableColumn {

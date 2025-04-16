@@ -57,13 +57,13 @@ const BulkEditDialog = ({
       // Handle different field types
       if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(selectedField)) {
         // For boolean fields
-        updatedRecord[selectedField as keyof UDIRecord] = newValue === "YES";
+        updatedRecord[selectedField] = newValue === "YES";
       } else if (selectedField === 'status') {
         // For status field (which is an enum)
         updatedRecord.status = newValue as any;
       } else {
         // For all other fields (strings, numbers, dates)
-        updatedRecord[selectedField as keyof UDIRecord] = newValue as any;
+        updatedRecord[selectedField] = newValue;
       }
 
       // Validate the record with the new value
