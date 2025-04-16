@@ -16,7 +16,7 @@ const StatusBadge = ({ record }: StatusBadgeProps) => {
     case 'valid':
       return (
         <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-          Valid
+          <CheckCircle className="h-3 w-3 mr-1" /> Valid
         </Badge>
       );
     case 'warning':
@@ -30,10 +30,14 @@ const StatusBadge = ({ record }: StatusBadgeProps) => {
                 </Badge>
               </div>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="bg-warning/10 border-warning">
               <div className="max-w-xs">
+                <div className="text-sm font-medium mb-1">Warning Details:</div>
                 {warnings?.map((warning, idx) => (
-                  <div key={idx} className="text-xs">{warning}</div>
+                  <div key={idx} className="text-xs flex items-start gap-1">
+                    <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                    <span>{warning}</span>
+                  </div>
                 ))}
               </div>
             </TooltipContent>
@@ -51,10 +55,14 @@ const StatusBadge = ({ record }: StatusBadgeProps) => {
                 </Badge>
               </div>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="bg-error/10 border-error">
               <div className="max-w-xs">
+                <div className="text-sm font-medium mb-1">Error Details:</div>
                 {errors?.map((error, idx) => (
-                  <div key={idx} className="text-xs">{error}</div>
+                  <div key={idx} className="text-xs flex items-start gap-1">
+                    <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
                 ))}
               </div>
             </TooltipContent>

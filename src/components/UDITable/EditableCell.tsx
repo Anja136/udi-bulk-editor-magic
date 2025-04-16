@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Edit, Save, AlertCircle, Check, X } from 'lucide-react';
 import { UDIRecord } from '@/types/udi';
 import StatusBadge from './StatusBadge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EditableCellProps {
   record: UDIRecord;
@@ -45,7 +46,7 @@ const EditableCell = ({
             <Save className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" onClick={onCancel} title="Cancel">
-            <AlertCircle className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
       );
@@ -68,7 +69,7 @@ const EditableCell = ({
           <Save className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="icon" onClick={onCancel} title="Cancel">
-          <AlertCircle className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </Button>
       </div>
     );
@@ -97,7 +98,56 @@ const EditableCell = ({
 
   const isEditable = column !== 'status' && !record.isLocked;
   const cellValue = String(record[column as keyof UDIRecord] || '');
+  
+  // Check if this field has errors
+  const hasError = record.status === 'invalid' && 
+    record.errors && 
+    record.errors.some(err => err.toLowerCase().includes(column.toLowerCase()));
+  
+  // Check if this field has warnings
+  const hasWarning = record.status === 'warning' && 
+    record.warnings && 
+    record.warnings.some(warn => warn.toLowerCase().includes(column.toLowerCase()));
 
+  // If there's an error or warning for this cell, show it with a tooltip
+  if (hasError || hasWarning) {
+    const relevantMessages = hasError 
+      ? record.errors?.filter(err => err.toLowerCase().includes(column.toLowerCase()))
+      : record.warnings?.filter(warn => warn.toLowerCase().includes(column.toLowerCase()));
+    
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''} ${hasError ? 'border-l-4 border-error' : 'border-l-4 border-warning'}`}
+              onClick={isEditable ? onStartEditing : undefined}
+            >
+              <div className="flex items-center w-full">
+                <span className={`truncate ${hasError ? 'text-error font-medium' : 'text-warning font-medium'}`}>
+                  {cellValue}
+                </span>
+                {hasError ? (
+                  <AlertCircle className="h-4 w-4 ml-1 text-error" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 ml-1 text-warning" />
+                )}
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="max-w-xs">
+              {relevantMessages?.map((message, idx) => (
+                <div key={idx} className="text-xs">{message}</div>
+              ))}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  // Regular cell with no errors
   return (
     <div
       className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}

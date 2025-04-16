@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { UDIRecord, DataSheet } from '@/types/udi';
-import GMDNSheet from './GMDNSheet';
 import DataTableContent from './DataTableContent';
 import { UDITableColumn } from '@/types/udi';
 import { FilterOption } from '@/lib/filterUtils';
@@ -84,10 +83,6 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
           onClearFilter={onClearFilter}
           activeFilters={activeFilters}
         />
-      </TabsContent>
-      
-      <TabsContent value="gmdn" className="mt-2">
-        <GMDNSheet records={records} />
       </TabsContent>
     </Tabs>
   );

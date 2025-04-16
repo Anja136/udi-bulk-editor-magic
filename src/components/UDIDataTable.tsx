@@ -5,8 +5,7 @@ import { FilterOption, createColumnFilter } from '@/lib/filterUtils';
 import ActiveFilters from './UDITable/ActiveFilters';
 import SheetTabs from './UDITable/SheetTabs';
 import { useUDITable } from '@/hooks/useUDITable';
-import { FileText, List, PencilLine } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileText } from 'lucide-react';
 import BulkEditDialog from './UDITable/BulkEditDialog';
 
 interface UDIDataTableProps {
@@ -42,7 +41,6 @@ const UDIDataTable = ({
   
   const sheets: DataSheet[] = [
     { id: 'basic', name: 'Basic Information', type: 'basic', icon: <FileText className="h-4 w-4" /> },
-    { id: 'gmdn', name: 'GMDN Codes', type: 'gmdn', icon: <List className="h-4 w-4" /> },
   ];
 
   // Column filtering functions
@@ -69,25 +67,26 @@ const UDIDataTable = ({
 
   return (
     <div className="w-full space-y-4">
-      {activeFilters && activeFilters.length > 0 ? (
-        <ActiveFilters 
-          activeFilters={activeFilters}
-          columns={columns}
-          filteredRecords={records}
-          onClearColumnFilter={clearColumnFilter}
-          onClearAllFilters={() => onFilterChange?.([])}
-          onDataChange={handleBulkUpdate}
-        />
-      ) : (
-        <div className="flex justify-end mb-3">
-          <BulkEditDialog 
-            filteredRecords={records}
+      <div className="flex justify-between mb-3">
+        {activeFilters && activeFilters.length > 0 ? (
+          <ActiveFilters 
+            activeFilters={activeFilters}
             columns={columns}
-            activeFilters={[]}
-            onRecordsUpdate={handleBulkUpdate}
+            filteredRecords={records}
+            onClearColumnFilter={clearColumnFilter}
+            onClearAllFilters={() => onFilterChange?.([])}
+            onDataChange={handleBulkUpdate}
           />
-        </div>
-      )}
+        ) : (
+          <div></div>
+        )}
+        <BulkEditDialog 
+          filteredRecords={records}
+          columns={columns}
+          activeFilters={activeFilters || []}
+          onRecordsUpdate={handleBulkUpdate}
+        />
+      </div>
       
       <SheetTabs
         activeSheet={activeSheet}
