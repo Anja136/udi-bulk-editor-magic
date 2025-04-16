@@ -30,3 +30,26 @@ export const filterRecords = (records: UDIRecord[], filters: FilterOption[]): UD
     });
   });
 };
+
+// Get unique values for a specific column in the records
+export const getUniqueColumnValues = (records: UDIRecord[], column: keyof UDIRecord): string[] => {
+  const valueSet = new Set<string>();
+  
+  records.forEach(record => {
+    const value = String(record[column] || '');
+    if (value.trim()) {
+      valueSet.add(value);
+    }
+  });
+  
+  return Array.from(valueSet).sort();
+};
+
+// Apply a quick filter for a specific column and value (exact match)
+export const createColumnFilter = (column: keyof UDIRecord, value: string): FilterOption => {
+  return {
+    column,
+    value,
+    operation: 'equals'
+  };
+};

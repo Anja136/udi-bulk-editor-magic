@@ -6,18 +6,28 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Save, Lock, Unlock, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Edit, Save, Lock, Unlock, AlertCircle, CheckCircle, AlertTriangle, Filter, Search } from 'lucide-react';
 import { validateRecord } from '@/lib/validators';
+import { FilterOption, getUniqueColumnValues, createColumnFilter } from '@/lib/filterUtils';
 
 interface UDIDataTableProps {
   data: UDIRecord[];
   onDataChange: (data: UDIRecord[]) => void;
+  onFilterChange?: (filters: FilterOption[]) => void;
+  activeFilters?: FilterOption[];
 }
 
-const UDIDataTable = ({ data, onDataChange }: UDIDataTableProps) => {
+const UDIDataTable = ({ 
+  data, 
+  onDataChange, 
+  onFilterChange,
+  activeFilters = []
+}: UDIDataTableProps) => {
   const [records, setRecords] = useState<UDIRecord[]>([]);
   const [editingCell, setEditingCell] = useState<{ rowId: string; column: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
 
   useEffect(() => {
     setRecords(data);
@@ -154,6 +164,103 @@ const UDIDataTable = ({ data, onDataChange }: UDIDataTableProps) => {
     return badgeContent;
   };
 
+  // Column filtering functions
+  const isColumnFiltered = (column: keyof UDIRecord) => {
+    return activeFilters?.some(filter => filter.column === column);
+  };
+
+  const applyFilter = (column: keyof UDIRecord, value: string) => {
+    // Remove any existing filters for this column
+    const otherFilters = activeFilters?.filter(f => f.column !== column) || [];
+    
+    // Create a new filter
+    const newFilter = createColumnFilter(column, value);
+    
+    // Apply the new filter along with other existing filters
+    onFilterChange?.([...otherFilters, newFilter]);
+  };
+
+  const clearColumnFilter = (column: keyof UDIRecord) => {
+    const updatedFilters = activeFilters?.filter(f => f.column !== column) || [];
+    onFilterChange?.(updatedFilters);
+  };
+
+  const filterSearch = (uniqueValues: string[], searchTerm: string) => {
+    if (!searchTerm) return uniqueValues;
+    return uniqueValues.filter(value => 
+      value.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
+  const ColumnFilterPopover = ({ column }: { column: keyof UDIRecord }) => {
+    // Don't create filter UI for the Status column
+    if (column === 'status') return null;
+    
+    const uniqueValues = getUniqueColumnValues(records, column);
+    const isFiltered = isColumnFiltered(column);
+    const currentValue = activeFilters?.find(f => f.column === column)?.value;
+    const filteredValues = filterSearch(uniqueValues, searchValue);
+    
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className={isFiltered ? "text-primary" : "text-muted-foreground"}
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-60 p-0" align="start">
+          <div className="p-2 border-b">
+            <div className="flex items-center space-x-1">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search values..." 
+                className="h-8 flex-1"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="max-h-[200px] overflow-auto">
+            {filteredValues.length > 0 ? (
+              <div className="grid grid-cols-1 p-2 gap-1">
+                {filteredValues.map((value, idx) => (
+                  <Button
+                    key={idx}
+                    variant={currentValue === value ? "default" : "ghost"}
+                    size="sm"
+                    className="justify-start font-normal"
+                    onClick={() => applyFilter(column, value)}
+                  >
+                    {value}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No values found
+              </div>
+            )}
+          </div>
+          {isFiltered && (
+            <div className="p-2 border-t flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => clearColumnFilter(column)}
+              >
+                Clear Filter
+              </Button>
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
   return (
     <div className="w-full overflow-auto">
       <Table className="min-w-full">
@@ -161,9 +268,14 @@ const UDIDataTable = ({ data, onDataChange }: UDIDataTableProps) => {
           <TableRow>
             <TableHead className="w-12 text-center">Actions</TableHead>
             {columns.map((column) => (
-              <TableHead key={column.key}>
-                {column.label}
-                {column.required && <span className="text-error"> *</span>}
+              <TableHead key={column.key} className="relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    {column.label}
+                    {column.required && <span className="text-error"> *</span>}
+                  </div>
+                  <ColumnFilterPopover column={column.key as keyof UDIRecord} />
+                </div>
               </TableHead>
             ))}
           </TableRow>
