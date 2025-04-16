@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 import { UDIRecord, DataSheet } from '@/types/udi';
 import DataTableContent from './DataTableContent';
 import { UDITableColumn } from '@/types/udi';
@@ -60,11 +60,16 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
             <TabsTrigger key={sheet.id} value={sheet.id} className="flex items-center gap-2">
               {sheet.icon}
               {sheet.name}
-              {sheet.id === 'basic' && (invalidCount > 0 || warningCount > 0) && (
-                <span className={`ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full ${
-                  invalidCount > 0 ? 'bg-error/20 text-error' : 'bg-warning/20 text-warning'
-                }`}>
-                  {invalidCount > 0 ? invalidCount : warningCount}
+              {sheet.id === 'basic' && invalidCount > 0 && (
+                <span className="ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-error/20 text-error flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-0.5" />
+                  {invalidCount}
+                </span>
+              )}
+              {sheet.id === 'basic' && invalidCount === 0 && warningCount > 0 && (
+                <span className="ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-warning/20 text-warning flex items-center">
+                  <AlertTriangle className="h-3 w-3 mr-0.5" />
+                  {warningCount}
                 </span>
               )}
             </TabsTrigger>

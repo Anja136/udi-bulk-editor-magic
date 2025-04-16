@@ -40,6 +40,21 @@ const TableContent: React.FC<TableContentProps> = ({
   renderHeader,
   renderActions
 }) => {
+  // Helper function to determine if a cell has errors or warnings
+  const getCellErrorStatus = (record: UDIRecord, column: string) => {
+    if (record.status === 'invalid' && record.errors) {
+      return record.errors.some(err => err.toLowerCase().includes(column.toLowerCase()))
+        ? 'error'
+        : null;
+    }
+    if (record.status === 'warning' && record.warnings) {
+      return record.warnings.some(warn => warn.toLowerCase().includes(column.toLowerCase()))
+        ? 'warning'
+        : null;
+    }
+    return null;
+  };
+
   return (
     <div className={className}>
       <Table>
@@ -91,24 +106,30 @@ const TableContent: React.FC<TableContentProps> = ({
                   </TableCell>
                 )}
                 
-                {columns.map((column) => (
-                  <TableCell 
-                    key={`${record.id}-${column.key}`}
-                    style={{ width: column.width, minWidth: column.width }}
-                    className={column.frozen ? "sticky left-0 z-20 bg-background h-12 py-0" : "h-12 py-0"}
-                  >
-                    <EditableCell
-                      record={record}
-                      column={column.key}
-                      isEditing={editingCell?.rowId === record.id && editingCell?.column === column.key}
-                      editValue={editValue}
-                      onStartEditing={() => onStartEditing(record, column.key)}
-                      onEditValueChange={onEditValueChange}
-                      onSave={onSave}
-                      onCancel={onCancel}
-                    />
-                  </TableCell>
-                ))}
+                {columns.map((column) => {
+                  const errorStatus = getCellErrorStatus(record, column.key);
+                  
+                  return (
+                    <TableCell 
+                      key={`${record.id}-${column.key}`}
+                      style={{ width: column.width, minWidth: column.width }}
+                      className={`${column.frozen ? "sticky left-0 z-20 bg-background" : ""} 
+                                 ${errorStatus === 'error' ? 'bg-error/5' : errorStatus === 'warning' ? 'bg-warning/5' : ''} 
+                                 h-12 py-0`}
+                    >
+                      <EditableCell
+                        record={record}
+                        column={column.key}
+                        isEditing={editingCell?.rowId === record.id && editingCell?.column === column.key}
+                        editValue={editValue}
+                        onStartEditing={() => onStartEditing(record, column.key)}
+                        onEditValueChange={onEditValueChange}
+                        onSave={onSave}
+                        onCancel={onCancel}
+                      />
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))
           )}

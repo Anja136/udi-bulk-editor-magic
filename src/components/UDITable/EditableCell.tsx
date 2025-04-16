@@ -2,7 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Save, AlertCircle, X } from 'lucide-react';
+import { Edit, Save, AlertCircle, X, AlertTriangle } from 'lucide-react';
 import { UDIRecord } from '@/types/udi';
 import StatusBadge from './StatusBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -126,25 +126,27 @@ const EditableCell = ({
   if (fieldMessages.length > 0) {
     return (
       <TooltipProvider>
-        <Tooltip>
+        <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <div
               className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
               onClick={isEditable ? onStartEditing : undefined}
             >
-              <div className="flex items-center w-full pl-1">
-                <span className={`mr-2 ${hasError ? 'text-error' : 'text-warning'}`}>
+              <div className="flex items-center justify-between w-full pl-1">
+                <span className={`${hasError ? 'text-error' : 'text-warning'} mr-1`}>
                   {cellValue}
                 </span>
-                {hasError ? (
-                  <AlertCircle className="h-4 w-4 text-error flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="h-4 w-4 text-warning flex-shrink-0" />
-                )}
+                <div className="flex-shrink-0 ml-auto">
+                  {hasError ? (
+                    <AlertCircle className="h-4 w-4 text-error" />
+                  ) : (
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                  )}
+                </div>
               </div>
             </div>
           </TooltipTrigger>
-          <TooltipContent className={hasError ? "bg-error/10 border-error" : "bg-warning/10 border-warning"}>
+          <TooltipContent side="right" align="start" className={`max-w-xs ${hasError ? "bg-error/10 border-error" : "bg-warning/10 border-warning"}`}>
             <div className="max-w-xs">
               <div className="text-sm font-medium mb-1">{hasError ? 'Error:' : 'Warning:'}</div>
               {fieldMessages.map((message, idx) => (
@@ -152,7 +154,7 @@ const EditableCell = ({
                   {hasError ? (
                     <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
                   ) : (
-                    <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                    <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
                   )}
                   <span>{message}</span>
                 </div>

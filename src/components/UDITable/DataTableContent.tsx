@@ -62,14 +62,14 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
               </div>
             )}
             <div className="text-xs mt-1 text-muted-foreground">
-              Fields with issues are highlighted in the table. Click on cells to edit them.
+              Fields with issues are highlighted in the table. Hover over icons to see error details.
             </div>
           </AlertDescription>
         </Alert>
       )}
       
       <div className="border rounded-md overflow-hidden">
-        <ScrollArea className="h-[calc(100vh-400px)]">
+        <ScrollArea className="h-[calc(100vh-400px)]" orientation="both">
           <div className="flex flex-row w-full min-w-full">
             <FrozenColumns
               columns={frozenColumns}
