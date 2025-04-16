@@ -39,9 +39,9 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   activeFilters
 }) => {
   return (
-    <div className="border rounded-md">
-      <ScrollArea className="h-[calc(100vh-320px)]">
-        <div className="flex flex-row w-full">
+    <div className="border rounded-md overflow-hidden">
+      <div className="h-[calc(100vh-320px)] overflow-auto">
+        <div className="flex flex-row w-full min-w-full">
           <FrozenColumns
             columns={frozenColumns}
             records={records}
@@ -73,7 +73,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
             activeFilters={activeFilters}
           />
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

@@ -77,7 +77,6 @@ const BulkEditDialog = ({
         <Button 
           variant="outline" 
           className="flex items-center gap-2"
-          disabled={filteredRecords.length === 0}
         >
           <PencilLine className="h-4 w-4" />
           Bulk Edit

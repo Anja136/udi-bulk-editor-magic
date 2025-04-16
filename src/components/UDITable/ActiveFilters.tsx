@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { X, PencilLine } from 'lucide-react';
 import { UDIRecord, UDITableColumn } from '@/types/udi';
 import { FilterOption } from '@/lib/filterUtils';
 import BulkEditDialog from './BulkEditDialog';
@@ -24,7 +24,7 @@ const ActiveFilters = ({
   onClearAllFilters,
   onDataChange
 }: ActiveFiltersProps) => {
-  // Only render the component if there are active filters - filteredRecords check removed
+  // Render the component even if there are active filters but no filtered records
   if (activeFilters.length === 0) return null;
   
   return (
@@ -66,16 +66,14 @@ const ActiveFilters = ({
           </Button>
         )}
       </div>
-      {filteredRecords.length > 0 && (
-        <div className="flex items-center">
-          <BulkEditDialog 
-            filteredRecords={filteredRecords}
-            columns={columns}
-            activeFilters={activeFilters}
-            onRecordsUpdate={onDataChange}
-          />
-        </div>
-      )}
+      <div className="flex items-center">
+        <BulkEditDialog 
+          filteredRecords={filteredRecords}
+          columns={columns}
+          activeFilters={activeFilters}
+          onRecordsUpdate={onDataChange}
+        />
+      </div>
     </div>
   );
 };

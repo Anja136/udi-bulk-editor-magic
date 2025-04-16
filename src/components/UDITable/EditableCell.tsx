@@ -63,15 +63,16 @@ const EditableCell = ({
     return (
       <div className="flex items-center justify-center h-full">
         {isEditable ? (
-          <Switch 
-            checked={isChecked} 
-            onCheckedChange={(checked) => {
-              onEditValueChange(String(checked));
-              setTimeout(onSave, 0);
-            }}
-            disabled={!isEditable}
-            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
-          />
+          <div className="flex items-center">
+            <Switch 
+              checked={isChecked} 
+              onCheckedChange={(checked) => {
+                onEditValueChange(String(checked));
+                setTimeout(onSave, 0);
+              }}
+              disabled={!isEditable}
+            />
+          </div>
         ) : (
           <div className="flex justify-center">
             {isChecked ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-muted-foreground" />}
