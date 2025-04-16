@@ -164,6 +164,8 @@ const Index = () => {
               <UDIDataTable
                 data={filteredData}
                 onDataChange={handleDataChange}
+                onFilterChange={handleFilterChange}
+                activeFilters={filters}
               />
               
               <div className="mt-4 flex justify-between">

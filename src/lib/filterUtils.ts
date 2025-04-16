@@ -45,7 +45,7 @@ export const getUniqueColumnValues = (records: UDIRecord[], column: keyof UDIRec
   return Array.from(valueSet).sort();
 };
 
-// Apply a quick filter for a specific column and value (exact match)
+// Apply a quick filter for a specific column and value
 export const createColumnFilter = (column: keyof UDIRecord, value: string): FilterOption => {
   return {
     column,

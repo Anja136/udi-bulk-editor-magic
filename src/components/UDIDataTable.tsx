@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Edit, Save, Lock, Unlock, AlertCircle, CheckCircle, AlertTriangle, Filter, Search } from 'lucide-react';
+import { Edit, Save, Lock, Unlock, AlertCircle, CheckCircle, AlertTriangle, Filter, Search, X } from 'lucide-react';
 import { validateRecord } from '@/lib/validators';
-import { FilterOption, getUniqueColumnValues, createColumnFilter } from '@/lib/filterUtils';
+import { FilterOption, getUniqueColumnValues, createColumnFilter, filterRecords } from '@/lib/filterUtils';
 
 interface UDIDataTableProps {
   data: UDIRecord[];
@@ -28,7 +28,7 @@ const UDIDataTable = ({
   const [editingCell, setEditingCell] = useState<{ rowId: string; column: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
-
+  
   useEffect(() => {
     setRecords(data);
   }, [data]);
@@ -88,6 +88,27 @@ const UDIDataTable = ({
     onDataChange(updatedRecords);
   };
 
+  // Column filtering functions
+  const isColumnFiltered = (column: keyof UDIRecord) => {
+    return activeFilters?.some(filter => filter.column === column);
+  };
+
+  const applyFilter = (column: keyof UDIRecord, value: string) => {
+    // Remove any existing filters for this column
+    const otherFilters = activeFilters?.filter(f => f.column !== column) || [];
+    
+    // Create a new filter
+    const newFilter = createColumnFilter(column, value);
+    
+    // Apply the new filter along with other existing filters
+    onFilterChange?.([...otherFilters, newFilter]);
+  };
+
+  const clearColumnFilter = (column: keyof UDIRecord) => {
+    const updatedFilters = activeFilters?.filter(f => f.column !== column) || [];
+    onFilterChange?.(updatedFilters);
+  };
+
   const getStatusIcon = (status: UDIRecord['status']) => {
     switch (status) {
       case 'valid':
@@ -118,9 +139,11 @@ const UDIDataTable = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">
-                  <AlertTriangle className="h-3 w-3 mr-1" /> Warning
-                </Badge>
+                <div className="inline-flex">
+                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">
+                    <AlertTriangle className="h-3 w-3 mr-1" /> Warning
+                  </Badge>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <div className="max-w-xs">
@@ -138,9 +161,11 @@ const UDIDataTable = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge variant="outline" className="bg-error/10 text-error border-error/20">
-                  <AlertCircle className="h-3 w-3 mr-1" /> Invalid
-                </Badge>
+                <div className="inline-flex">
+                  <Badge variant="outline" className="bg-error/10 text-error border-error/20">
+                    <AlertCircle className="h-3 w-3 mr-1" /> Invalid
+                  </Badge>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <div className="max-w-xs">
@@ -164,27 +189,6 @@ const UDIDataTable = ({
     return badgeContent;
   };
 
-  // Column filtering functions
-  const isColumnFiltered = (column: keyof UDIRecord) => {
-    return activeFilters?.some(filter => filter.column === column);
-  };
-
-  const applyFilter = (column: keyof UDIRecord, value: string) => {
-    // Remove any existing filters for this column
-    const otherFilters = activeFilters?.filter(f => f.column !== column) || [];
-    
-    // Create a new filter
-    const newFilter = createColumnFilter(column, value);
-    
-    // Apply the new filter along with other existing filters
-    onFilterChange?.([...otherFilters, newFilter]);
-  };
-
-  const clearColumnFilter = (column: keyof UDIRecord) => {
-    const updatedFilters = activeFilters?.filter(f => f.column !== column) || [];
-    onFilterChange?.(updatedFilters);
-  };
-
   const filterSearch = (uniqueValues: string[], searchTerm: string) => {
     if (!searchTerm) return uniqueValues;
     return uniqueValues.filter(value => 
@@ -199,7 +203,8 @@ const UDIDataTable = ({
     const uniqueValues = getUniqueColumnValues(records, column);
     const isFiltered = isColumnFiltered(column);
     const currentValue = activeFilters?.find(f => f.column === column)?.value;
-    const filteredValues = filterSearch(uniqueValues, searchValue);
+    const [localSearchValue, setLocalSearchValue] = useState('');
+    const filteredValues = filterSearch(uniqueValues, localSearchValue);
     
     return (
       <Popover>
@@ -212,15 +217,15 @@ const UDIDataTable = ({
             <Filter className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-60 p-0" align="start">
+        <PopoverContent className="w-60 p-0 z-50" align="start">
           <div className="p-2 border-b">
             <div className="flex items-center space-x-1">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search values..." 
                 className="h-8 flex-1"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                value={localSearchValue}
+                onChange={(e) => setLocalSearchValue(e.target.value)}
               />
             </div>
           </div>
@@ -263,6 +268,39 @@ const UDIDataTable = ({
 
   return (
     <div className="w-full overflow-auto">
+      {activeFilters.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-3 p-2 bg-muted/30 rounded-md">
+          <span className="text-sm font-medium px-2 py-1">Active filters:</span>
+          {activeFilters.map((filter, idx) => {
+            const columnDef = columns.find(c => c.key === filter.column);
+            return (
+              <Badge 
+                key={idx} 
+                variant="secondary"
+                className="flex items-center gap-1 px-2 py-1"
+              >
+                {columnDef?.label || filter.column}: {filter.value}
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-4 w-4 ml-1 p-0"
+                  onClick={() => clearColumnFilter(filter.column)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            );
+          })}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs"
+            onClick={() => onFilterChange?.([])}
+          >
+            Clear all
+          </Button>
+        </div>
+      )}
       <Table className="min-w-full">
         <TableHeader className="bg-muted/50">
           <TableRow>
