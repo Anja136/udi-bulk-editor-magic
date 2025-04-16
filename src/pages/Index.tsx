@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { UDIRecord } from '@/types/udi';
 import FileUploader from '@/components/FileUploader';
 import UDIDataTable from '@/components/UDIDataTable';
@@ -11,10 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Upload, Table, ArrowLeft, ArrowRight, Database } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { generateMockData } from '@/lib/mockData';
+import { FilterOption, filterRecords } from '@/lib/filterUtils';
 
 const Index = () => {
   const [data, setData] = useState<UDIRecord[]>([]);
   const [activeTab, setActiveTab] = useState<string>('upload');
+  const [filters, setFilters] = useState<FilterOption[]>([]);
   const { toast } = useToast();
 
   const handleDataLoaded = (newData: UDIRecord[]) => {
@@ -34,6 +36,7 @@ const Index = () => {
   const handleClearData = () => {
     setData([]);
     setActiveTab('upload');
+    setFilters([]);
   };
 
   const loadTestData = (count: number, withIssues: boolean = true) => {
@@ -44,7 +47,7 @@ const Index = () => {
       const unlockRecords = testData.map((record, index) => ({
         ...record,
         isLocked: index % 3 !== 0, // Make every third record unlocked for easy editing tests
-        status: 'valid',
+        status: 'valid' as const,
         errors: undefined,
         warnings: undefined
       }));
@@ -60,6 +63,14 @@ const Index = () => {
       description: `${count} test records are ready for editing.`,
     });
   };
+
+  const handleFilterChange = (newFilters: FilterOption[]) => {
+    setFilters(newFilters);
+  };
+
+  const filteredData = useMemo(() => {
+    return filterRecords(data, filters);
+  }, [data, filters]);
 
   return (
     <div className="container max-w-7xl mx-auto py-6 space-y-6">
@@ -141,15 +152,17 @@ const Index = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <TableControls 
-                data={data}
+                data={filteredData}
                 onDataChange={handleDataChange}
                 onClearData={handleClearData}
+                onFilterChange={handleFilterChange}
+                activeFilters={filters}
               />
               
               <Separator />
               
               <UDIDataTable
-                data={data}
+                data={filteredData}
                 onDataChange={handleDataChange}
               />
               

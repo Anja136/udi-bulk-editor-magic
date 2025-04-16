@@ -1,18 +1,93 @@
-
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { UDIRecord } from '@/types/udi';
 import { validateRecords } from '@/lib/validators';
 import { useToast } from '@/components/ui/use-toast';
-import { Download, Save, Trash, Lock, Unlock, Filter, CheckCircle, AlertCircle } from 'lucide-react';
+import { 
+  Download, Save, Trash, Lock, Unlock, Filter, CheckCircle, 
+  AlertCircle, FilterX, Search 
+} from 'lucide-react';
+import { FilterOption } from '@/lib/filterUtils';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface TableControlsProps {
   data: UDIRecord[];
   onDataChange: (data: UDIRecord[]) => void;
   onClearData: () => void;
+  onFilterChange?: (filters: FilterOption[]) => void;
+  activeFilters?: FilterOption[];
 }
 
-const TableControls = ({ data, onDataChange, onClearData }: TableControlsProps) => {
+const TableControls = ({ 
+  data, 
+  onDataChange, 
+  onClearData, 
+  onFilterChange,
+  activeFilters = [] 
+}: TableControlsProps) => {
   const { toast } = useToast();
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [filterColumn, setFilterColumn] = useState<keyof UDIRecord>('modelNumber');
+  const [filterOperation, setFilterOperation] = useState<FilterOption['operation']>('contains');
+  const [filterValue, setFilterValue] = useState('');
+
+  const columnOptions: Array<{value: keyof UDIRecord; label: string}> = [
+    { value: 'deviceIdentifier', label: 'Device Identifier' },
+    { value: 'manufacturerName', label: 'Manufacturer' },
+    { value: 'productName', label: 'Product' },
+    { value: 'modelNumber', label: 'Model #' },
+    { value: 'lotNumber', label: 'Lot #' },
+    { value: 'serialNumber', label: 'Serial #' },
+  ];
+
+  const operationOptions = [
+    { value: 'contains', label: 'Contains' },
+    { value: 'equals', label: 'Equals' },
+    { value: 'startsWith', label: 'Starts with' },
+    { value: 'endsWith', label: 'Ends with' },
+  ];
+
+  const addFilter = () => {
+    if (!filterValue.trim()) return;
+    
+    const newFilter: FilterOption = {
+      column: filterColumn,
+      operation: filterOperation,
+      value: filterValue
+    };
+    
+    const updatedFilters = [...activeFilters, newFilter];
+    onFilterChange?.(updatedFilters);
+    setFilterValue('');
+    
+    toast({
+      title: 'Filter added',
+      description: `Filtering ${filterColumn} ${filterOperation} "${filterValue}"`,
+    });
+  };
+
+  const removeFilter = (index: number) => {
+    const updatedFilters = activeFilters.filter((_, i) => i !== index);
+    onFilterChange?.(updatedFilters);
+  };
+
+  const clearFilters = () => {
+    onFilterChange?.([]);
+    setShowFilterPanel(false);
+  };
 
   const validateAll = () => {
     const validatedData = validateRecords(data);
@@ -129,6 +204,14 @@ const TableControls = ({ data, onDataChange, onClearData }: TableControlsProps) 
           <Unlock className="mr-2 h-4 w-4" />
           Unlock All
         </Button>
+        <Button 
+          onClick={() => setShowFilterPanel(!showFilterPanel)} 
+          variant={activeFilters.length > 0 ? "default" : "outline"} 
+          className="flex items-center"
+        >
+          {activeFilters.length > 0 ? <FilterX className="mr-2 h-4 w-4" /> : <Search className="mr-2 h-4 w-4" />}
+          {activeFilters.length > 0 ? `Filters (${activeFilters.length})` : 'Filter'}
+        </Button>
         <Button onClick={exportData} variant="outline" className="flex items-center">
           <Download className="mr-2 h-4 w-4" />
           Export
@@ -142,6 +225,86 @@ const TableControls = ({ data, onDataChange, onClearData }: TableControlsProps) 
           Import
         </Button>
       </div>
+      
+      {showFilterPanel && (
+        <div className="p-4 border rounded-md space-y-4 bg-background/50">
+          <div className="text-sm font-medium mb-2">Add Filter</div>
+          <div className="flex flex-wrap gap-2">
+            <Select value={filterColumn as string} onValueChange={(value) => setFilterColumn(value as keyof UDIRecord)}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Column" />
+              </SelectTrigger>
+              <SelectContent>
+                {columnOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={filterOperation} onValueChange={(value) => setFilterOperation(value as FilterOption['operation'])}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Operation" />
+              </SelectTrigger>
+              <SelectContent>
+                {operationOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Input
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              placeholder="Filter value..."
+              className="flex-1 min-w-[200px]"
+              onKeyDown={(e) => e.key === 'Enter' && addFilter()}
+            />
+            
+            <Button onClick={addFilter} className="flex items-center">
+              Add
+            </Button>
+            
+            {activeFilters.length > 0 && (
+              <Button onClick={clearFilters} variant="outline" className="flex items-center">
+                <FilterX className="mr-2 h-4 w-4" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
+          
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {activeFilters.map((filter, index) => {
+                const columnLabel = columnOptions.find(col => col.value === filter.column)?.label || filter.column;
+                const operationLabel = operationOptions.find(op => op.value === filter.operation)?.label || filter.operation;
+                
+                return (
+                  <div 
+                    key={index} 
+                    className="flex items-center gap-1 text-xs bg-secondary px-2 py-1 rounded-md"
+                  >
+                    <span className="font-medium">{columnLabel}</span>
+                    <span>{operationLabel}</span>
+                    <span className="italic">"{filter.value}"</span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-4 w-4 ml-1" 
+                      onClick={() => removeFilter(index)}
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
       
       {data.length > 0 && (
         <div className="flex space-x-4 text-sm">
@@ -159,6 +322,12 @@ const TableControls = ({ data, onDataChange, onClearData }: TableControlsProps) 
             <div className="flex items-center">
               <AlertCircle className="mr-1 h-4 w-4 text-error" />
               <span>{invalidRecords} invalid records</span>
+            </div>
+          )}
+          {activeFilters.length > 0 && (
+            <div className="flex items-center">
+              <Filter className="mr-1 h-4 w-4 text-muted-foreground" />
+              <span>Showing {data.length} of {data.length} records</span>
             </div>
           )}
         </div>
