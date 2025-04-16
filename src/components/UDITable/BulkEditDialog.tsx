@@ -8,6 +8,7 @@ import { UDIRecord, UDITableColumn } from '@/types/udi';
 import { validateRecord } from '@/lib/validators';
 import { FilterOption } from '@/lib/filterUtils';
 import { PencilLine } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface BulkEditDialogProps {
   filteredRecords: UDIRecord[];
@@ -25,6 +26,7 @@ const BulkEditDialog = ({
   const [open, setOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<string>("");
   const [newValue, setNewValue] = useState<string>("");
+  const { toast } = useToast();
 
   // Only show editable columns
   const editableColumns = columns.filter(col => col.editable);
@@ -32,6 +34,10 @@ const BulkEditDialog = ({
   const handleApplyChanges = () => {
     if (!selectedField || !newValue) return;
 
+    // Count how many records will actually be updated (unlocked records)
+    const unlockedCount = filteredRecords.filter(record => !record.isLocked).length;
+
+    // Update all unlocked records in the filtered set
     const updatedRecords = filteredRecords.map(record => {
       // Skip locked records
       if (record.isLocked) return record;
@@ -47,6 +53,13 @@ const BulkEditDialog = ({
     });
 
     onRecordsUpdate(updatedRecords);
+    
+    // Show a toast notification to confirm the changes
+    toast({
+      title: "Bulk edit complete",
+      description: `Updated ${unlockedCount} records with new ${selectedField} value.`,
+    });
+    
     setOpen(false);
     setNewValue("");
     setSelectedField("");
