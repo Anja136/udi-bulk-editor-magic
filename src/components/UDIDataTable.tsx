@@ -106,13 +106,21 @@ const UDIDataTable = ({
     onFilterChange?.(updatedFilters);
   };
 
+  const handleBulkUpdate = (updatedRecords: UDIRecord[]) => {
+    // This will be called when bulk edit is applied
+    setRecords(updatedRecords);
+    onDataChange(updatedRecords);
+  };
+
   return (
     <div className="w-full overflow-auto">
       <ActiveFilters 
         activeFilters={activeFilters}
         columns={columns}
+        filteredRecords={records}
         onClearColumnFilter={clearColumnFilter}
         onClearAllFilters={() => onFilterChange?.([])}
+        onDataChange={handleBulkUpdate}
       />
       
       <Table className="min-w-full">
