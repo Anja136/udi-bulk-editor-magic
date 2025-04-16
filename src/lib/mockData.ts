@@ -29,16 +29,31 @@ export const generateMockData = (count: number): UDIRecord[] => {
     // For some records, create validation issues
     if (index % 7 === 0) {
       status = 'invalid';
-      errors.push('Invalid device identifier format');
+      if (index % 2 === 0) {
+        errors.push('Invalid device identifier format');
+      } else {
+        errors.push('Required field missing');
+      }
     } else if (index % 5 === 0) {
       status = 'warning';
-      warnings.push('Expiration date is approaching');
+      if (index % 2 === 0) {
+        warnings.push('Expiration date is approaching');
+      } else {
+        warnings.push('Model number format is non-standard');
+      }
+    } else if (index % 11 === 0) {
+      status = 'invalid';
+      errors.push('Manufacturer name does not match registered entries');
+      errors.push('Serial number format is invalid');
     }
+    
+    // Set some records as unlocked for easier testing
+    const isLocked = index % 4 !== 0;
     
     return {
       id: uuidv4(),
       deviceIdentifier: `UDI-${(10000 + index).toString()}-${modelNumber}`,
-      manufacturerName: manufacturer,
+      manufacturerName: index % 13 === 0 ? '' : manufacturer, // Create some empty required fields
       productName: `${productPrefix} ${productSuffix}`,
       modelNumber,
       productionDate: formatDate(productionDate),
@@ -48,7 +63,7 @@ export const generateMockData = (count: number): UDIRecord[] => {
       status,
       errors: errors.length > 0 ? errors : undefined,
       warnings: warnings.length > 0 ? warnings : undefined,
-      isLocked: true
+      isLocked
     };
   });
 };

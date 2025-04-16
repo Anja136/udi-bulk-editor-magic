@@ -62,6 +62,10 @@ const UDIDataTable = ({ data, onDataChange }: UDIDataTableProps) => {
     setEditingCell(null);
   };
 
+  const cancelEditing = () => {
+    setEditingCell(null);
+  };
+
   const toggleLock = (id: string) => {
     const updatedRecords = records.map(record => {
       if (record.id === id) {
@@ -180,6 +184,7 @@ const UDIDataTable = ({ data, onDataChange }: UDIDataTableProps) => {
                     size="icon"
                     onClick={() => toggleLock(record.id)}
                     className={record.isLocked ? 'text-muted-foreground' : 'text-primary'}
+                    title={record.isLocked ? "Unlock to edit" : "Lock editing"}
                   >
                     {record.isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
                   </Button>
@@ -194,22 +199,28 @@ const UDIDataTable = ({ data, onDataChange }: UDIDataTableProps) => {
                           onChange={(e) => setEditValue(e.target.value)}
                           className="h-8 w-full"
                           autoFocus
-                          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSave();
+                            if (e.key === 'Escape') cancelEditing();
+                          }}
                         />
-                        <Button variant="ghost" size="icon" onClick={handleSave}>
+                        <Button variant="ghost" size="icon" onClick={handleSave} title="Save">
                           <Save className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={cancelEditing} title="Cancel">
+                          <AlertCircle className="h-4 w-4" />
                         </Button>
                       </div>
                     ) : (
                       <div
-                        className={`flex items-center ${column.editable && !record.isLocked ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded' : ''}`}
+                        className={`flex items-center ${column.editable && !record.isLocked ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
                         onClick={() => column.editable && startEditing(record, column.key)}
                       >
                         {column.key === 'status' ? (
                           getStatusBadge(record)
                         ) : (
-                          <div className="flex items-center">
-                            <span>
+                          <div className="flex items-center w-full">
+                            <span className="truncate">
                               {String(record[column.key as keyof UDIRecord] || '')}
                             </span>
                             {column.editable && !record.isLocked && (
