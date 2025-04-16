@@ -133,7 +133,7 @@ const EditableCell = ({
               onClick={isEditable ? onStartEditing : undefined}
             >
               <div className="flex items-center justify-between w-full pl-1">
-                <span className={`${hasError ? 'text-error' : 'text-warning'} mr-1`}>
+                <span className={`${hasError ? 'text-error font-medium' : 'text-warning font-medium'} mr-1`}>
                   {cellValue}
                 </span>
                 <div className="flex-shrink-0 ml-auto">

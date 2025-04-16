@@ -7,6 +7,7 @@ import { UDIRecord, DataSheet } from '@/types/udi';
 import DataTableContent from './DataTableContent';
 import { UDITableColumn } from '@/types/udi';
 import { FilterOption } from '@/lib/filterUtils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SheetTabsProps {
   activeSheet: string;
@@ -49,8 +50,25 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
   activeFilters
 }) => {
   // Count the number of records with issues
-  const invalidCount = records.filter(r => r.status === 'invalid').length;
-  const warningCount = records.filter(r => r.status === 'warning').length;
+  const invalidRecords = records.filter(r => r.status === 'invalid').length;
+  const warningRecords = records.filter(r => r.status === 'warning').length;
+  
+  // Get a summary of the affected devices and errors
+  const getErrorSummary = () => {
+    if (invalidRecords === 0 && warningRecords === 0) return null;
+    
+    const invalidDevices = records
+      .filter(r => r.status === 'invalid')
+      .map(r => ({ id: r.deviceIdentifier, name: r.productName, errors: r.errors || [] }));
+    
+    const warningDevices = records
+      .filter(r => r.status === 'warning')
+      .map(r => ({ id: r.deviceIdentifier, name: r.productName, warnings: r.warnings || [] }));
+    
+    return { invalidDevices, warningDevices };
+  };
+  
+  const errorSummary = getErrorSummary();
   
   return (
     <Tabs value={activeSheet} onValueChange={setActiveSheet} className="w-full">
@@ -60,17 +78,59 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
             <TabsTrigger key={sheet.id} value={sheet.id} className="flex items-center gap-2">
               {sheet.icon}
               {sheet.name}
-              {sheet.id === 'basic' && invalidCount > 0 && (
-                <span className="ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-error/20 text-error flex items-center">
-                  <AlertCircle className="h-3 w-3 mr-0.5" />
-                  {invalidCount}
-                </span>
+              {sheet.id === 'basic' && invalidRecords > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-error/20 text-error flex items-center">
+                        <AlertCircle className="h-3 w-3 mr-0.5" />
+                        {invalidRecords}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-md bg-error/10 border-error">
+                      <div className="text-sm font-medium mb-1">Devices with Errors:</div>
+                      <div className="max-h-52 overflow-y-auto">
+                        {errorSummary?.invalidDevices.map((device, idx) => (
+                          <div key={idx} className="mb-2">
+                            <div className="text-xs font-medium">{device.id} - {device.name}</div>
+                            <ul className="text-xs list-disc ml-4">
+                              {device.errors.map((err, errIdx) => (
+                                <li key={errIdx}>{err}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
-              {sheet.id === 'basic' && invalidCount === 0 && warningCount > 0 && (
-                <span className="ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-warning/20 text-warning flex items-center">
-                  <AlertTriangle className="h-3 w-3 mr-0.5" />
-                  {warningCount}
-                </span>
+              {sheet.id === 'basic' && invalidRecords === 0 && warningRecords > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="ml-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-warning/20 text-warning flex items-center">
+                        <AlertTriangle className="h-3 w-3 mr-0.5" />
+                        {warningRecords}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-md bg-warning/10 border-warning">
+                      <div className="text-sm font-medium mb-1">Devices with Warnings:</div>
+                      <div className="max-h-52 overflow-y-auto">
+                        {errorSummary?.warningDevices.map((device, idx) => (
+                          <div key={idx} className="mb-2">
+                            <div className="text-xs font-medium">{device.id} - {device.name}</div>
+                            <ul className="text-xs list-disc ml-4">
+                              {device.warnings.map((warn, warnIdx) => (
+                                <li key={warnIdx}>{warn}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </TabsTrigger>
           ))}

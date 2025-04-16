@@ -99,7 +99,7 @@ const TableContent: React.FC<TableContentProps> = ({
             </TableRow>
           ) : (
             records.map((record) => (
-              <TableRow key={`table-row-${record.id}`} className="bg-background">
+              <TableRow key={`table-row-${record.id}`} className={`bg-background ${record.status === 'invalid' ? 'bg-error/5' : record.status === 'warning' ? 'bg-warning/5' : ''}`}>
                 {renderActions && (
                   <TableCell className="text-center sticky left-0 z-20 bg-background h-12 py-0">
                     {renderActions(record)}
@@ -114,7 +114,8 @@ const TableContent: React.FC<TableContentProps> = ({
                       key={`${record.id}-${column.key}`}
                       style={{ width: column.width, minWidth: column.width }}
                       className={`${column.frozen ? "sticky left-0 z-20 bg-background" : ""} 
-                                 ${errorStatus === 'error' ? 'bg-error/5' : errorStatus === 'warning' ? 'bg-warning/5' : ''} 
+                                 ${errorStatus === 'error' ? 'bg-error/10 border-b border-error/40' : 
+                                   errorStatus === 'warning' ? 'bg-warning/10 border-b border-warning/40' : ''} 
                                  h-12 py-0`}
                     >
                       <EditableCell
