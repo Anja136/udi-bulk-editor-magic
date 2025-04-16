@@ -32,7 +32,7 @@ const BulkEditDialog = ({
   const editableColumns = columns.filter(col => col.editable);
 
   const handleApplyChanges = () => {
-    if (!selectedField || !newValue) return;
+    if (!selectedField) return;
 
     // Count how many records will actually be updated (unlocked records)
     const unlockedCount = filteredRecords.filter(record => !record.isLocked).length;
@@ -42,10 +42,18 @@ const BulkEditDialog = ({
       // Skip locked records
       if (record.isLocked) return record;
 
+      // Get the appropriate value based on the field type
+      let valueToSet = newValue;
+      
+      // For boolean fields, convert "YES"/"NO" strings to boolean values
+      if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(selectedField)) {
+        valueToSet = newValue === "YES" ? "true" : "false";
+      }
+
       // Update the selected field for unlocked records
       const updatedRecord = {
         ...record,
-        [selectedField]: newValue
+        [selectedField]: valueToSet
       };
 
       // Validate the record with the new value
@@ -70,6 +78,9 @@ const BulkEditDialog = ({
     const unlocked = filteredRecords.filter(record => !record.isLocked).length;
     return `${unlocked} of ${filteredRecords.length} records will be updated (${filteredRecords.length - unlocked} are locked)`;
   };
+
+  // Is the selected field a boolean type?
+  const isBooleanField = ['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(selectedField);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -108,7 +119,10 @@ const BulkEditDialog = ({
             </label>
             <Select 
               value={selectedField} 
-              onValueChange={setSelectedField}
+              onValueChange={(value) => {
+                setSelectedField(value);
+                setNewValue(""); // Reset value when field changes
+              }}
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select a field" />
@@ -122,18 +136,37 @@ const BulkEditDialog = ({
               </SelectContent>
             </Select>
           </div>
+          
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="value" className="text-right text-sm">
               New value
             </label>
-            <Input
-              id="value"
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              className="col-span-3"
-              disabled={!selectedField}
-            />
+            
+            {isBooleanField ? (
+              <Select
+                value={newValue}
+                onValueChange={setNewValue}
+                disabled={!selectedField}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select value" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="YES">YES</SelectItem>
+                  <SelectItem value="NO">NO</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="value"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                className="col-span-3"
+                disabled={!selectedField}
+              />
+            )}
           </div>
+          
           {filteredRecords.length > 0 && (
             <div className="text-xs text-muted-foreground mt-2">
               {getAffectedRecordsCount()}

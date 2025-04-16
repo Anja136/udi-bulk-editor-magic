@@ -4,6 +4,7 @@ import { UDIRecord } from '@/types/udi';
 import GMDNSheetDeviceSelector from './GMDNSheetDeviceSelector';
 import GMDNSheetTable from './GMDNSheetTable';
 import { useGMDNSheet } from '@/hooks/useGMDNSheet';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface GMDNSheetProps {
   records: UDIRecord[];
@@ -28,27 +29,31 @@ const GMDNSheet: React.FC<GMDNSheetProps> = ({ records }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col gap-4">
         <GMDNSheetDeviceSelector
           records={records}
           selectedDevice={selectedDevice}
           onSelectDevice={setSelectedDevice}
         />
         
-        <GMDNSheetTable
-          selectedDevice={selectedDevice}
-          gmdnRecords={filteredGMDNRecords}
-          editingRecord={editingRecord}
-          editCode={editCode}
-          editTerm={editTerm}
-          onAddGMDN={handleAddGMDN}
-          onEditGMDN={handleEditGMDN}
-          onSaveGMDN={handleSaveGMDN}
-          onDeleteGMDN={handleDeleteGMDN}
-          onCancelEditing={cancelEditing}
-          onEditCodeChange={setEditCode}
-          onEditTermChange={setEditTerm}
-        />
+        <div className="border rounded-md overflow-hidden">
+          <ScrollArea className="h-[calc(100vh-380px)]">
+            <GMDNSheetTable
+              selectedDevice={selectedDevice}
+              gmdnRecords={filteredGMDNRecords}
+              editingRecord={editingRecord}
+              editCode={editCode}
+              editTerm={editTerm}
+              onAddGMDN={handleAddGMDN}
+              onEditGMDN={handleEditGMDN}
+              onSaveGMDN={handleSaveGMDN}
+              onDeleteGMDN={handleDeleteGMDN}
+              onCancelEditing={cancelEditing}
+              onEditCodeChange={setEditCode}
+              onEditTermChange={setEditTerm}
+            />
+          </ScrollArea>
+        </div>
       </div>
     </div>
   );

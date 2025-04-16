@@ -3,7 +3,6 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Edit, Save, AlertCircle, Check, X } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
 import { UDIRecord } from '@/types/udi';
 import StatusBadge from './StatusBadge';
 
@@ -29,6 +28,30 @@ const EditableCell = ({
   onCancel
 }: EditableCellProps) => {
   if (isEditing) {
+    // Special handling for boolean values when editing
+    if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(column)) {
+      return (
+        <div className="flex items-center space-x-2 h-full">
+          <select
+            value={editValue}
+            onChange={(e) => onEditValueChange(e.target.value)}
+            className="h-8 w-full border rounded-md px-2"
+            autoFocus
+          >
+            <option value="true">YES</option>
+            <option value="false">NO</option>
+          </select>
+          <Button variant="ghost" size="icon" onClick={onSave} title="Save">
+            <Save className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onCancel} title="Cancel">
+            <AlertCircle className="h-4 w-4" />
+          </Button>
+        </div>
+      );
+    }
+
+    // Regular editing for non-boolean values
     return (
       <div className="flex items-center space-x-1 h-full">
         <Input
@@ -55,29 +78,19 @@ const EditableCell = ({
     return <StatusBadge record={record} />;
   }
 
-  // Handle boolean type fields
+  // Handle boolean type fields - display YES or NO instead of switch
   if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(column)) {
     const isChecked = Boolean(record[column as keyof UDIRecord]);
     const isEditable = !record.isLocked;
     
     return (
-      <div className="flex items-center justify-center h-full">
-        {isEditable ? (
-          <div className="flex items-center">
-            <Switch 
-              checked={isChecked} 
-              onCheckedChange={(checked) => {
-                onEditValueChange(String(checked));
-                setTimeout(onSave, 0);
-              }}
-              disabled={!isEditable}
-            />
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            {isChecked ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-muted-foreground" />}
-          </div>
-        )}
+      <div 
+        className={`flex items-center justify-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
+        onClick={isEditable ? onStartEditing : undefined}
+      >
+        <span className={`font-medium ${isChecked ? 'text-green-600' : 'text-red-600'}`}>
+          {isChecked ? 'YES' : 'NO'}
+        </span>
       </div>
     );
   }
