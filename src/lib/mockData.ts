@@ -49,6 +49,12 @@ export const generateMockData = (count: number): UDIRecord[] => {
     
     // Set some records as unlocked for easier testing
     const isLocked = index % 4 !== 0;
+
+    // Generate random boolean values for the new fields
+    const singleUse = Math.random() > 0.5;
+    const sterilized = Math.random() > 0.3;
+    const containsLatex = Math.random() > 0.7;
+    const containsPhthalate = Math.random() > 0.8;
     
     return {
       id: uuidv4(),
@@ -60,6 +66,10 @@ export const generateMockData = (count: number): UDIRecord[] => {
       expirationDate: formatDate(expirationDate),
       lotNumber: `LOT-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
       serialNumber: `SN-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`,
+      singleUse,
+      sterilized,
+      containsLatex,
+      containsPhthalate,
       status,
       errors: errors.length > 0 ? errors : undefined,
       warnings: warnings.length > 0 ? warnings : undefined,

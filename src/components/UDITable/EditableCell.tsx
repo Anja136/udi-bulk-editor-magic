@@ -2,7 +2,8 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Save, AlertCircle } from 'lucide-react';
+import { Edit, Save, AlertCircle, Check, X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { UDIRecord } from '@/types/udi';
 import StatusBadge from './StatusBadge';
 
@@ -52,6 +53,31 @@ const EditableCell = ({
 
   if (column === 'status') {
     return <StatusBadge record={record} />;
+  }
+
+  // Handle boolean type fields
+  if (['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(column)) {
+    const isChecked = Boolean(record[column as keyof UDIRecord]);
+    const isEditable = !record.isLocked;
+    
+    return (
+      <div className="flex items-center justify-center">
+        {isEditable ? (
+          <Switch 
+            checked={isChecked} 
+            onCheckedChange={(checked) => {
+              onEditValueChange(String(checked));
+              setTimeout(onSave, 0);
+            }}
+            disabled={!isEditable}
+          />
+        ) : (
+          <>
+            {isChecked ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-muted-foreground" />}
+          </>
+        )}
+      </div>
+    );
   }
 
   const isEditable = column !== 'status' && !record.isLocked;

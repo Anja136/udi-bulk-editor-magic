@@ -9,6 +9,10 @@ export interface UDIRecord {
   expirationDate: string;
   lotNumber: string;
   serialNumber: string;
+  singleUse: boolean;
+  sterilized: boolean;
+  containsLatex: boolean;
+  containsPhthalate: boolean;
   status: 'valid' | 'invalid' | 'warning' | 'pending';
   errors?: string[];
   warnings?: string[];
@@ -20,5 +24,26 @@ export interface UDITableColumn {
   label: string;
   editable: boolean;
   required: boolean;
+  frozen?: boolean;
+  width?: string;
+  type?: 'text' | 'boolean' | 'date';
   validator?: (value: string) => { valid: boolean; message?: string };
+}
+
+export interface GMDNRecord {
+  id: string;
+  deviceIdentifier: string;
+  gmdnCode: string;
+  gmdnTerm: string;
+  status: 'valid' | 'invalid' | 'warning' | 'pending';
+  isLocked: boolean;
+}
+
+export type SheetType = 'basic' | 'gmdn' | 'custom';
+
+export interface DataSheet {
+  id: string;
+  name: string;
+  type: SheetType;
+  icon?: React.ReactNode;
 }
