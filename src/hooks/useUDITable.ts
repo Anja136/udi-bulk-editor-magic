@@ -8,9 +8,10 @@ interface UseUDITableProps {
   data: UDIRecord[];
   onDataChange: (data: UDIRecord[]) => void;
   activeFilters?: FilterOption[];
+  viewMode?: boolean;
 }
 
-export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITableProps) => {
+export const useUDITable = ({ data, onDataChange, activeFilters = [], viewMode = false }: UseUDITableProps) => {
   const [records, setRecords] = useState<UDIRecord[]>([]);
   const [editingCell, setEditingCell] = useState<{ rowId: string; column: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
@@ -22,18 +23,18 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
   }, [data]);
 
   const columns: UDITableColumn[] = [
-    { key: 'deviceIdentifier', label: 'Device Identifier', editable: true, required: true, frozen: true, width: '200px' },
-    { key: 'manufacturerName', label: 'Manufacturer', editable: true, required: true, frozen: true, width: '180px' },
-    { key: 'productName', label: 'Product', editable: true, required: true, width: '180px' },
-    { key: 'modelNumber', label: 'Model #', editable: true, required: false, width: '120px' },
-    { key: 'singleUse', label: 'Single Use', editable: true, required: false, type: 'boolean', width: '100px' },
-    { key: 'sterilized', label: 'Sterilized', editable: true, required: false, type: 'boolean', width: '100px' },
-    { key: 'containsLatex', label: 'Contains Latex', editable: true, required: false, type: 'boolean', width: '120px' },
-    { key: 'containsPhthalate', label: 'Contains Phthalate', editable: true, required: false, type: 'boolean', width: '150px' },
-    { key: 'productionDate', label: 'Production Date', editable: true, required: false, type: 'date', width: '150px' },
-    { key: 'expirationDate', label: 'Expiration Date', editable: true, required: false, type: 'date', width: '150px' },
-    { key: 'lotNumber', label: 'Lot #', editable: true, required: false, width: '120px' },
-    { key: 'serialNumber', label: 'Serial #', editable: true, required: false, width: '120px' },
+    { key: 'deviceIdentifier', label: 'Device Identifier', editable: !viewMode, required: true, frozen: true, width: '200px' },
+    { key: 'manufacturerName', label: 'Manufacturer', editable: !viewMode, required: true, frozen: true, width: '180px' },
+    { key: 'productName', label: 'Product', editable: !viewMode, required: true, width: '180px' },
+    { key: 'modelNumber', label: 'Model #', editable: !viewMode, required: false, width: '120px' },
+    { key: 'singleUse', label: 'Single Use', editable: !viewMode, required: false, type: 'boolean', width: '100px' },
+    { key: 'sterilized', label: 'Sterilized', editable: !viewMode, required: false, type: 'boolean', width: '100px' },
+    { key: 'containsLatex', label: 'Contains Latex', editable: !viewMode, required: false, type: 'boolean', width: '120px' },
+    { key: 'containsPhthalate', label: 'Contains Phthalate', editable: !viewMode, required: false, type: 'boolean', width: '150px' },
+    { key: 'productionDate', label: 'Production Date', editable: !viewMode, required: false, type: 'date', width: '150px' },
+    { key: 'expirationDate', label: 'Expiration Date', editable: !viewMode, required: false, type: 'date', width: '150px' },
+    { key: 'lotNumber', label: 'Lot #', editable: !viewMode, required: false, width: '120px' },
+    { key: 'serialNumber', label: 'Serial #', editable: !viewMode, required: false, width: '120px' },
     { key: 'status', label: 'Status', editable: false, required: false, width: '100px' },
   ];
 
@@ -42,7 +43,7 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
   const scrollableColumns = columns.filter(col => !col.frozen);
 
   const startEditing = (record: UDIRecord, column: string) => {
-    if (record.isLocked) return;
+    if (record.isLocked || viewMode) return;
     
     setEditingCell({ rowId: record.id, column });
     
@@ -57,7 +58,7 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
   };
 
   const handleSave = () => {
-    if (!editingCell) return;
+    if (!editingCell || viewMode) return;
     
     const { rowId, column } = editingCell;
     const updatedRecords = records.map(record => {
@@ -91,6 +92,8 @@ export const useUDITable = ({ data, onDataChange, activeFilters = [] }: UseUDITa
   };
 
   const toggleLock = (id: string) => {
+    if (viewMode) return;
+    
     const updatedRecords = records.map(record => {
       if (record.id === id) {
         return { ...record, isLocked: !record.isLocked };

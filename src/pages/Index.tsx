@@ -1,14 +1,14 @@
 
 import { useState, useMemo } from 'react';
 import { UDIRecord } from '@/types/udi';
-import FileUploader from '@/components/FileUploader';
+import FileUploader, { UploadHistory } from '@/components/FileUploader';
 import UDIDataTable from '@/components/UDIDataTable';
 import TableControls from '@/components/TableControls';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Upload, Table, ArrowLeft, ArrowRight, Database } from 'lucide-react';
+import { Upload, Table, ArrowLeft, ArrowRight, Database, FileText, Lock } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { generateMockData } from '@/lib/mockData';
 import { FilterOption, filterRecords } from '@/lib/filterUtils';
@@ -17,11 +17,15 @@ const Index = () => {
   const [data, setData] = useState<UDIRecord[]>([]);
   const [activeTab, setActiveTab] = useState<string>('upload');
   const [filters, setFilters] = useState<FilterOption[]>([]);
+  const [viewMode, setViewMode] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState<UploadHistory | null>(null);
   const { toast } = useToast();
 
   const handleDataLoaded = (newData: UDIRecord[]) => {
     setData(newData);
     setActiveTab('table');
+    setViewMode(false);
+    setSelectedHistory(null);
     
     toast({
       title: "Data loaded successfully",
@@ -29,7 +33,20 @@ const Index = () => {
     });
   };
 
+  const handleHistorySelect = (history: UploadHistory) => {
+    setData(history.data);
+    setActiveTab('table');
+    setViewMode(true);
+    setSelectedHistory(history);
+    
+    toast({
+      title: "Historical data loaded",
+      description: `Viewing ${history.fileName} in read-only mode.`,
+    });
+  };
+
   const handleDataChange = (updatedData: UDIRecord[]) => {
+    if (viewMode) return; // Prevent edits in view mode
     setData(updatedData);
   };
 
@@ -37,6 +54,8 @@ const Index = () => {
     setData([]);
     setActiveTab('upload');
     setFilters([]);
+    setViewMode(false);
+    setSelectedHistory(null);
   };
 
   const loadTestData = (count: number, withIssues: boolean = true) => {
@@ -57,6 +76,8 @@ const Index = () => {
     }
     
     setActiveTab('table');
+    setViewMode(false);
+    setSelectedHistory(null);
     
     toast({
       title: "Test data loaded",
@@ -71,6 +92,11 @@ const Index = () => {
   const filteredData = useMemo(() => {
     return filterRecords(data, filters);
   }, [data, filters]);
+
+  const exitViewMode = () => {
+    setViewMode(false);
+    setSelectedHistory(null);
+  };
 
   return (
     <div className="container max-w-7xl mx-auto py-6 space-y-6">
@@ -91,6 +117,7 @@ const Index = () => {
             <TabsTrigger value="table" disabled={data.length === 0} className="flex items-center gap-2">
               <Table className="h-4 w-4" />
               Data Editor
+              {viewMode && <Lock className="h-3 w-3 ml-1" />}
             </TabsTrigger>
           </TabsList>
           
@@ -125,7 +152,10 @@ const Index = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <FileUploader onDataLoaded={handleDataLoaded} />
+              <FileUploader 
+                onDataLoaded={handleDataLoaded} 
+                onHistorySelect={handleHistorySelect}
+              />
             </CardContent>
           </Card>
           
@@ -145,10 +175,37 @@ const Index = () => {
         <TabsContent value="table" className="mt-0">
           <Card>
             <CardHeader>
-              <CardTitle>UDI Data Editor</CardTitle>
-              <CardDescription>
-                Edit, validate, and manage your UDI data before import
-              </CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>
+                    {viewMode ? (
+                      <div className="flex items-center">
+                        <span>UDI Data Viewer</span>
+                        <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-muted">Read Only</span>
+                      </div>
+                    ) : (
+                      "UDI Data Editor"
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    {viewMode 
+                      ? `Viewing historical data: ${selectedHistory?.fileName}`
+                      : "Edit, validate, and manage your UDI data before import"}
+                  </CardDescription>
+                </div>
+                
+                {viewMode && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={exitViewMode}
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Edit New Data
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <TableControls 
@@ -157,6 +214,7 @@ const Index = () => {
                 onClearData={handleClearData}
                 onFilterChange={handleFilterChange}
                 activeFilters={filters}
+                viewMode={viewMode}
               />
               
               <Separator />
@@ -166,6 +224,7 @@ const Index = () => {
                 onDataChange={handleDataChange}
                 onFilterChange={handleFilterChange}
                 activeFilters={filters}
+                viewMode={viewMode}
               />
               
               <div className="mt-4 flex justify-between">

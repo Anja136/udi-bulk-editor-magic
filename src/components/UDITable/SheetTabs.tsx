@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+import { PlusCircle, AlertCircle, AlertTriangle, Lock } from 'lucide-react';
 import { UDIRecord, DataSheet } from '@/types/udi';
 import DataTableContent from './DataTableContent';
 import { UDITableColumn } from '@/types/udi';
@@ -28,6 +28,7 @@ interface SheetTabsProps {
   onApplyFilter: (column: string, value: string) => void;
   onClearFilter: (column: string) => void;
   activeFilters?: FilterOption[];
+  viewMode?: boolean;
 }
 
 const SheetTabs: React.FC<SheetTabsProps> = ({
@@ -47,7 +48,8 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
   isColumnFiltered,
   onApplyFilter,
   onClearFilter,
-  activeFilters
+  activeFilters,
+  viewMode = false
 }) => {
   // Count the number of records with issues
   const invalidRecords = records.filter(r => r.status === 'invalid').length;
@@ -78,6 +80,7 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
             <TabsTrigger key={sheet.id} value={sheet.id} className="flex items-center gap-2">
               {sheet.icon}
               {sheet.name}
+              {viewMode && <Lock className="h-3 w-3 ml-1" />}
               {sheet.id === 'basic' && invalidRecords > 0 && (
                 <TooltipProvider>
                   <Tooltip>
@@ -136,10 +139,12 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
           ))}
         </TabsList>
         
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <PlusCircle className="h-4 w-4" />
-          Add Sheet
-        </Button>
+        {!viewMode && (
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <PlusCircle className="h-4 w-4" />
+            Add Sheet
+          </Button>
+        )}
       </div>
       
       <TabsContent value="basic" className="mt-2">
@@ -158,6 +163,7 @@ const SheetTabs: React.FC<SheetTabsProps> = ({
           onApplyFilter={onApplyFilter}
           onClearFilter={onClearFilter}
           activeFilters={activeFilters}
+          viewMode={viewMode}
         />
       </TabsContent>
     </Tabs>

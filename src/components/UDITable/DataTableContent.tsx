@@ -19,6 +19,7 @@ interface DataTableContentProps {
   onApplyFilter: (column: string, value: string) => void;
   onClearFilter: (column: string) => void;
   activeFilters?: { column: string; value: string }[];
+  viewMode?: boolean;
 }
 
 const DataTableContent: React.FC<DataTableContentProps> = ({
@@ -35,7 +36,8 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   isColumnFiltered,
   onApplyFilter,
   onClearFilter,
-  activeFilters
+  activeFilters,
+  viewMode = false
 }) => {
   return (
     <div className="space-y-4">
@@ -56,6 +58,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
         onApplyFilter={onApplyFilter}
         onClearFilter={onClearFilter}
         activeFilters={activeFilters}
+        viewMode={viewMode}
       />
     </div>
   );

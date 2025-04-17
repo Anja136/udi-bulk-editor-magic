@@ -13,13 +13,15 @@ interface UDIDataTableProps {
   onDataChange: (data: UDIRecord[]) => void;
   onFilterChange?: (filters: FilterOption[]) => void;
   activeFilters?: FilterOption[];
+  viewMode?: boolean;
 }
 
 const UDIDataTable = ({ 
   data, 
   onDataChange, 
   onFilterChange,
-  activeFilters = []
+  activeFilters = [],
+  viewMode = false
 }: UDIDataTableProps) => {
   // Use the custom hook for table state and logic
   const {
@@ -37,7 +39,7 @@ const UDIDataTable = ({
     cancelEditing,
     toggleLock,
     isColumnFiltered,
-  } = useUDITable({ data, onDataChange, activeFilters });
+  } = useUDITable({ data, onDataChange, activeFilters, viewMode });
   
   const sheets: DataSheet[] = [
     { id: 'basic', name: 'Basic Information', type: 'basic', icon: <FileText className="h-4 w-4" /> },
@@ -80,12 +82,14 @@ const UDIDataTable = ({
         ) : (
           <div></div>
         )}
-        <BulkEditDialog 
-          filteredRecords={records}
-          columns={columns}
-          activeFilters={activeFilters || []}
-          onRecordsUpdate={handleBulkUpdate}
-        />
+        {!viewMode && (
+          <BulkEditDialog 
+            filteredRecords={records}
+            columns={columns}
+            activeFilters={activeFilters || []}
+            onRecordsUpdate={handleBulkUpdate}
+          />
+        )}
       </div>
       
       <SheetTabs
@@ -107,6 +111,7 @@ const UDIDataTable = ({
         onApplyFilter={applyFilter}
         onClearFilter={clearColumnFilter}
         activeFilters={activeFilters}
+        viewMode={viewMode}
       />
     </div>
   );
