@@ -1,15 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { UDIRecord, UDITableColumn } from '@/types/udi';
 import { validateRecord } from '@/lib/validators';
 import { FilterOption } from '@/lib/filterUtils';
 import { PencilLine } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+
+// Import refactored components
+import FieldSelector from './BulkEdit/FieldSelector';
+import BulkEditField from './BulkEdit/BulkEditField';
+import ActiveFiltersDisplay from './BulkEdit/ActiveFiltersDisplay';
+import AffectedRecordsInfo from './BulkEdit/AffectedRecordsInfo';
+import BulkEditActions from './BulkEdit/BulkEditActions';
 
 interface BulkEditDialogProps {
   filteredRecords: UDIRecord[];
@@ -28,9 +32,6 @@ const BulkEditDialog = ({
   const [selectedField, setSelectedField] = useState<string>("");
   const [newValue, setNewValue] = useState<string>("");
   const { toast } = useToast();
-
-  // Only show editable columns
-  const editableColumns = columns.filter(col => col.editable);
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -81,12 +82,6 @@ const BulkEditDialog = ({
     setOpen(false);
   };
 
-  // Display a message with the number of records that will be affected
-  const getAffectedRecordsCount = () => {
-    const unlocked = filteredRecords.filter(record => !record.isLocked).length;
-    return `${unlocked} of ${filteredRecords.length} records will be updated (${filteredRecords.length - unlocked} are locked)`;
-  };
-
   // Is the selected field a boolean type?
   const isBooleanField = ['singleUse', 'sterilized', 'containsLatex', 'containsPhthalate'].includes(selectedField);
   
@@ -95,23 +90,6 @@ const BulkEditDialog = ({
 
   // Is the field a multiline text field?
   const isMultilineField = false; // Add any multiline fields here if needed
-
-  // Active filters display
-  const renderActiveFilters = () => {
-    if (activeFilters.length === 0) return null;
-    
-    return (
-      <div className="mt-2 text-xs p-2 bg-muted rounded-sm">
-        <span className="font-semibold">Active filters: </span>
-        {activeFilters.map((filter, idx) => (
-          <span key={idx}>
-            {columns.find(c => c.key === filter.column)?.label || filter.column}: {filter.value}
-            {idx < activeFilters.length - 1 ? ', ' : ''}
-          </span>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -129,7 +107,10 @@ const BulkEditDialog = ({
           <DialogTitle>Bulk Edit Records</DialogTitle>
           <DialogDescription>
             Change values for all {filteredRecords.length} filtered records at once.
-            {renderActiveFilters()}
+            <ActiveFiltersDisplay 
+              activeFilters={activeFilters} 
+              columns={columns} 
+            />
           </DialogDescription>
         </DialogHeader>
 
@@ -138,96 +119,38 @@ const BulkEditDialog = ({
             <label htmlFor="field" className="text-right text-sm">
               Field to change
             </label>
-            <Select 
-              value={selectedField} 
-              onValueChange={(value) => {
+            <FieldSelector 
+              columns={columns}
+              selectedField={selectedField}
+              onFieldChange={(value) => {
                 setSelectedField(value);
                 setNewValue(""); // Reset value when field changes
               }}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a field" />
-              </SelectTrigger>
-              <SelectContent>
-                {editableColumns.map((column) => (
-                  <SelectItem key={column.key} value={column.key.toString()}>
-                    {column.label} {column.required && <span className="text-destructive">*</span>}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="value" className="text-right text-sm">
               New value
             </label>
-            
-            {isBooleanField ? (
-              <Select
-                value={newValue}
-                onValueChange={setNewValue}
-                disabled={!selectedField}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select value" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="YES">YES</SelectItem>
-                  <SelectItem value="NO">NO</SelectItem>
-                </SelectContent>
-              </Select>
-            ) : isDateField ? (
-              <Input
-                id="value"
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                className="col-span-3"
-                disabled={!selectedField}
-                type="date"
-                placeholder="YYYY-MM-DD"
-              />
-            ) : isMultilineField ? (
-              <Textarea
-                id="value"
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                className="col-span-3 min-h-[80px]"
-                disabled={!selectedField}
-                placeholder="Enter value..."
-              />
-            ) : (
-              <Input
-                id="value"
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                className="col-span-3"
-                disabled={!selectedField}
-                placeholder="Enter value..."
-              />
-            )}
+            <BulkEditField 
+              selectedField={selectedField}
+              newValue={newValue}
+              onValueChange={setNewValue}
+              isBooleanField={isBooleanField}
+              isDateField={isDateField}
+              isMultilineField={isMultilineField}
+            />
           </div>
           
-          {filteredRecords.length > 0 && (
-            <div className="text-xs text-muted-foreground mt-2">
-              {getAffectedRecordsCount()}
-            </div>
-          )}
+          <AffectedRecordsInfo filteredRecords={filteredRecords} />
         </div>
-        <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleApplyChanges}
-            disabled={!selectedField || !newValue}
-          >
-            Apply Changes
-          </Button>
-        </DialogFooter>
+        
+        <BulkEditActions 
+          onCancel={() => setOpen(false)}
+          onApply={handleApplyChanges}
+          isValid={!!selectedField && !!newValue}
+        />
       </DialogContent>
     </Dialog>
   );
