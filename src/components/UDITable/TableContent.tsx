@@ -66,7 +66,7 @@ const TableContent: React.FC<TableContentProps> = ({
             
             {columns.map((column) => (
               <TableHead 
-                key={column.key} 
+                key={column.key.toString()} 
                 style={{ width: column.width, minWidth: column.width }}
                 className={column.frozen ? "sticky left-0 z-20 bg-muted/50 h-12" : "h-12"}
               >
@@ -82,7 +82,7 @@ const TableContent: React.FC<TableContentProps> = ({
                       onApplyFilter={onApplyFilter}
                       onClearFilter={onClearFilter}
                       isFiltered={isColumnFiltered(column.key.toString())}
-                      currentValue={activeFilters?.find(f => f.column === column.key)?.value}
+                      currentValue={activeFilters?.find(f => f.column === column.key.toString())?.value}
                     />
                   </div>
                 )}
@@ -107,11 +107,12 @@ const TableContent: React.FC<TableContentProps> = ({
                 )}
                 
                 {columns.map((column) => {
-                  const errorStatus = getCellErrorStatus(record, column.key.toString());
+                  const columnKey = column.key.toString();
+                  const errorStatus = getCellErrorStatus(record, columnKey);
                   
                   return (
                     <TableCell 
-                      key={`${record.id}-${column.key}`}
+                      key={`${record.id}-${columnKey}`}
                       style={{ width: column.width, minWidth: column.width }}
                       className={`${column.frozen ? "sticky left-0 z-20 bg-background" : ""} 
                                  ${errorStatus === 'error' ? 'bg-error/10 border-b border-error/40' : 
@@ -120,10 +121,10 @@ const TableContent: React.FC<TableContentProps> = ({
                     >
                       <EditableCell
                         record={record}
-                        column={column.key}
-                        isEditing={editingCell?.rowId === record.id && editingCell?.column === column.key}
+                        column={columnKey}
+                        isEditing={editingCell?.rowId === record.id && editingCell?.column === columnKey}
                         editValue={editValue}
-                        onStartEditing={() => onStartEditing(record, column.key)}
+                        onStartEditing={() => onStartEditing(record, columnKey)}
                         onEditValueChange={onEditValueChange}
                         onSave={onSave}
                         onCancel={onCancel}

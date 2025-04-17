@@ -1,3 +1,4 @@
+
 export interface UDIRecord {
   id: string;
   deviceIdentifier: string;

@@ -18,10 +18,10 @@ interface DataTableContentProps {
   onSave: () => void;
   onCancel: () => void;
   onToggleLock: (id: string) => void;
-  isColumnFiltered: (column: keyof UDIRecord) => boolean;
-  onApplyFilter: (column: keyof UDIRecord, value: string) => void;
-  onClearFilter: (column: keyof UDIRecord) => void;
-  activeFilters?: { column: keyof UDIRecord; value: string }[];
+  isColumnFiltered: (column: string) => boolean;
+  onApplyFilter: (column: string, value: string) => void;
+  onClearFilter: (column: string) => void;
+  activeFilters?: { column: string; value: string }[];
 }
 
 const DataTableContent: React.FC<DataTableContentProps> = ({
@@ -70,7 +70,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
       
       <div className="border rounded-md overflow-hidden">
         <div className="h-[calc(100vh-400px)] relative">
-          <ScrollArea className="h-full" scrollHide={false} orientation="both">
+          <ScrollArea className="h-full" orientation="both">
             <div className="flex flex-row w-full min-w-full">
               <FrozenColumns
                 columns={frozenColumns}
