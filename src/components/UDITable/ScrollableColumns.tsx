@@ -35,7 +35,7 @@ const ScrollableColumns: React.FC<ScrollableColumnsProps> = ({
   viewMode = false
 }) => {
   return (
-    <div className="flex-1 overflow-x-auto">
+    <div className="flex-1 overflow-visible">
       <TableContent
         columns={columns}
         records={records}

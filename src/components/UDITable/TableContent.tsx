@@ -58,7 +58,7 @@ const TableContent: React.FC<TableContentProps> = ({
   };
 
   return (
-    <div className={className}>
+    <div className={`${className} w-full`}>
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
