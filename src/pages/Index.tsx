@@ -89,7 +89,7 @@ const Index = () => {
   };
   return <div className="container max-w-7xl mx-auto py-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">UDI Bulk Processing Editor</h1>
+        <h1 className="text-3xl font-bold tracking-tight">UDI Bulk Editor - Upload, Review & Edit</h1>
         <p className="text-muted-foreground mt-1">
           Upload, validate, and edit UDI device data in bulk
         </p>
@@ -124,7 +124,7 @@ const Index = () => {
         <TabsContent value="upload" className="mt-0">
           <Card>
             <CardHeader>
-              <CardTitle>Upload UDI Data</CardTitle>
+              <CardTitle>Drop the File</CardTitle>
               <CardDescription>
                 Upload your UDI data file in CSV or Excel format
               </CardDescription>
