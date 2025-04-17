@@ -24,10 +24,14 @@ const ColumnFilter = ({
   isFiltered,
   currentValue
 }: ColumnFilterProps) => {
-  // Don't create filter UI for the Status column
+  // Only exclude the Status column from filtering
   if (column === 'status') return null;
   
-  const uniqueValues = getUniqueColumnValues(records, column);
+  // For the actions column, we'll filter based on the locked status
+  const uniqueValues = column === 'actions' 
+    ? ['Locked', 'Unlocked'] 
+    : getUniqueColumnValues(records, column);
+    
   const [localSearchValue, setLocalSearchValue] = useState('');
   const [open, setOpen] = useState(false);
   

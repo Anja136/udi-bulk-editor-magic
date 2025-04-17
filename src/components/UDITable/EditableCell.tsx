@@ -6,6 +6,7 @@ import { Edit, Save, AlertCircle, X, AlertTriangle } from 'lucide-react';
 import { UDIRecord } from '@/types/udi';
 import StatusBadge from './StatusBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface EditableCellProps {
   record: UDIRecord;
@@ -148,69 +149,51 @@ const EditableCell = ({
   const cellValue = String(record[column as keyof UDIRecord] || '');
   
   // Check if this specific field has errors
-  const hasError = record.status === 'invalid' && 
-    record.errors && 
-    record.errors.some(err => err.toLowerCase().includes(column.toLowerCase()));
-  
-  // Check if this field has warnings
-  const hasWarning = record.status === 'warning' && 
-    record.warnings && 
-    record.warnings.some(warn => warn.toLowerCase().includes(column.toLowerCase()));
+  const fieldErrors = getFieldErrors(record, column);
+  const hasError = fieldErrors.errorMessages.length > 0;
+  const hasWarning = fieldErrors.warningMessages.length > 0;
 
-  // Get the specific messages related to this field
-  const getFieldErrors = () => {
-    if (hasError && record.errors) {
-      return record.errors.filter(err => err.toLowerCase().includes(column.toLowerCase()));
-    }
-    if (hasWarning && record.warnings) {
-      return record.warnings.filter(warn => warn.toLowerCase().includes(column.toLowerCase()));
-    }
-    return [];
-  };
-
-  const fieldMessages = getFieldErrors();
-
-  // If there's an error or warning for this specific cell, show it with a tooltip
-  if (fieldMessages.length > 0) {
+  // If there's an error or warning for this specific cell, show it with a popover
+  if (hasError || hasWarning) {
     return (
-      <TooltipProvider>
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <div
-              className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
-              onClick={isEditable ? onStartEditing : undefined}
-            >
-              <div className="flex items-center justify-between w-full pl-1">
-                <span className={`${hasError ? 'text-error font-medium' : 'text-warning font-medium'} mr-1`}>
-                  {cellValue}
-                </span>
-                <div className="flex-shrink-0 ml-auto">
-                  {hasError ? (
-                    <AlertCircle className="h-4 w-4 text-error" />
-                  ) : (
-                    <AlertTriangle className="h-4 w-4 text-warning" />
-                  )}
-                </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <div
+            className={`flex items-center h-full ${isEditable ? 'cursor-pointer hover:bg-secondary/50 p-1 rounded transition-colors' : ''}`}
+            onClick={isEditable ? onStartEditing : undefined}
+          >
+            <div className="flex items-center justify-between w-full pl-1">
+              <span className={`${hasError ? 'text-error' : 'text-warning'} mr-1`}>
+                {cellValue}
+              </span>
+              <div className="flex-shrink-0 ml-auto">
+                {hasError ? (
+                  <AlertCircle className="h-4 w-4 text-error" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                )}
               </div>
             </div>
-          </TooltipTrigger>
-          <TooltipContent side="right" align="start" className={`max-w-xs ${hasError ? "bg-error/10 border-error" : "bg-warning/10 border-warning"}`}>
-            <div className="max-w-xs">
-              <div className="text-sm font-medium mb-1">{hasError ? 'Error:' : 'Warning:'}</div>
-              {fieldMessages.map((message, idx) => (
-                <div key={idx} className="text-xs flex items-start gap-1">
-                  {hasError ? (
-                    <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                  )}
-                  <span>{message}</span>
-                </div>
-              ))}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent side="right" align="start" className={`max-w-xs ${hasError ? "bg-error/10 border-error" : "bg-warning/10 border-warning"}`}>
+          <div className="max-w-xs">
+            <div className="text-sm font-medium mb-1">{hasError ? 'Error:' : 'Warning:'}</div>
+            {fieldErrors.errorMessages.map((message, idx) => (
+              <div key={idx} className="text-xs flex items-start gap-1 mb-1">
+                <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0 text-error" />
+                <span>{message}</span>
+              </div>
+            ))}
+            {fieldErrors.warningMessages.map((message, idx) => (
+              <div key={idx} className="text-xs flex items-start gap-1">
+                <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0 text-warning" />
+                <span>{message}</span>
+              </div>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   }
 
@@ -229,5 +212,58 @@ const EditableCell = ({
     </div>
   );
 };
+
+// Helper function to get field-specific errors and warnings
+function getFieldErrors(record: UDIRecord, column: string) {
+  const errorMessages: string[] = [];
+  const warningMessages: string[] = [];
+  
+  // Define field-specific error message keywords
+  const errorKeywords: Record<string, string[]> = {
+    deviceIdentifier: ['device identifier', 'deviceidentifier'],
+    manufacturerName: ['manufacturer', 'manufacturername'],
+    productName: ['product', 'productname'],
+    modelNumber: ['model', 'modelnumber'],
+    singleUse: ['single use', 'singleuse'],
+    sterilized: ['sterilized'],
+    containsLatex: ['latex', 'containslatex'],
+    containsPhthalate: ['phthalate', 'containsphthalate'],
+    productionDate: ['production date', 'productiondate'],
+    expirationDate: ['expiration date', 'expirationdate'],
+    lotNumber: ['lot', 'lotnumber'],
+    serialNumber: ['serial', 'serialnumber']
+  };
+  
+  // Check for required fields
+  if (['deviceIdentifier', 'manufacturerName', 'productName'].includes(column) && !record[column as keyof UDIRecord]) {
+    errorMessages.push('This field is mandatory');
+  }
+  
+  // Check for specific field errors
+  if (record.errors) {
+    const fieldKeywords = errorKeywords[column] || [column.toLowerCase()];
+    
+    record.errors.forEach(error => {
+      const lowerError = error.toLowerCase();
+      if (fieldKeywords.some(keyword => lowerError.includes(keyword))) {
+        errorMessages.push(error);
+      }
+    });
+  }
+  
+  // Check for specific field warnings
+  if (record.warnings) {
+    const fieldKeywords = errorKeywords[column] || [column.toLowerCase()];
+    
+    record.warnings.forEach(warning => {
+      const lowerWarning = warning.toLowerCase();
+      if (fieldKeywords.some(keyword => lowerWarning.includes(keyword))) {
+        warningMessages.push(warning);
+      }
+    });
+  }
+  
+  return { errorMessages, warningMessages };
+}
 
 export default EditableCell;

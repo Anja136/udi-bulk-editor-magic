@@ -12,6 +12,13 @@ export const filterRecords = (records: UDIRecord[], filters: FilterOption[]): UD
   
   return records.filter(record => {
     return filters.every(filter => {
+      // Special handling for isLocked filter (Actions column)
+      if (filter.column === 'isLocked') {
+        const isLocked = record.isLocked;
+        const filterValue = filter.value === 'true';
+        return isLocked === filterValue;
+      }
+      
       const fieldValue = String(record[filter.column] || '').toLowerCase();
       const filterValue = filter.value.toLowerCase();
       

@@ -42,21 +42,6 @@ const TableContent: React.FC<TableContentProps> = ({
   renderActions,
   viewMode = false
 }) => {
-  // Helper function to determine if a cell has errors or warnings
-  const getCellErrorStatus = (record: UDIRecord, column: string) => {
-    if (record.status === 'invalid' && record.errors) {
-      return record.errors.some(err => err.toLowerCase().includes(column.toLowerCase()))
-        ? 'error'
-        : null;
-    }
-    if (record.status === 'warning' && record.warnings) {
-      return record.warnings.some(warn => warn.toLowerCase().includes(column.toLowerCase()))
-        ? 'warning'
-        : null;
-    }
-    return null;
-  };
-
   return (
     <div className={`${className} w-full`}>
       <Table>
@@ -110,16 +95,12 @@ const TableContent: React.FC<TableContentProps> = ({
                 
                 {columns.map((column) => {
                   const columnKey = column.key.toString();
-                  const errorStatus = getCellErrorStatus(record, columnKey);
                   
                   return (
                     <TableCell 
                       key={`${record.id}-${columnKey}`}
                       style={{ width: column.width, minWidth: column.width }}
-                      className={`${column.frozen ? "sticky left-0 z-20 bg-background" : ""} 
-                                 ${errorStatus === 'error' ? 'bg-error/10 border-b border-error/40' : 
-                                   errorStatus === 'warning' ? 'bg-warning/10 border-b border-warning/40' : ''} 
-                                 h-12 py-0`}
+                      className={`${column.frozen ? "sticky left-0 z-20 bg-background" : ""} h-12 py-0`}
                     >
                       <EditableCell
                         record={record}
