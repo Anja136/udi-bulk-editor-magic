@@ -16,6 +16,7 @@ interface ScrollableColumnsProps {
   onApplyFilter: (column: string, value: string) => void;
   onClearFilter: (column: string) => void;
   activeFilters?: { column: string; value: string }[];
+  viewMode?: boolean;
 }
 
 const ScrollableColumns: React.FC<ScrollableColumnsProps> = ({
@@ -30,7 +31,8 @@ const ScrollableColumns: React.FC<ScrollableColumnsProps> = ({
   isColumnFiltered,
   onApplyFilter,
   onClearFilter,
-  activeFilters
+  activeFilters,
+  viewMode = false
 }) => {
   return (
     <div className="flex-1 overflow-x-auto">
@@ -47,6 +49,7 @@ const ScrollableColumns: React.FC<ScrollableColumnsProps> = ({
         onApplyFilter={onApplyFilter}
         onClearFilter={onClearFilter}
         activeFilters={activeFilters}
+        viewMode={viewMode}
       />
     </div>
   );

@@ -19,6 +19,7 @@ interface FrozenColumnsProps {
   onApplyFilter: (column: string, value: string) => void;
   onClearFilter: (column: string) => void;
   activeFilters?: { column: string; value: string }[];
+  viewMode?: boolean;
 }
 
 const FrozenColumns: React.FC<FrozenColumnsProps> = ({
@@ -34,7 +35,8 @@ const FrozenColumns: React.FC<FrozenColumnsProps> = ({
   isColumnFiltered,
   onApplyFilter,
   onClearFilter,
-  activeFilters
+  activeFilters,
+  viewMode = false
 }) => {
   const renderColumnHeader = (column: UDITableColumn) => (
     <div className="flex items-center justify-between">
@@ -77,6 +79,7 @@ const FrozenColumns: React.FC<FrozenColumnsProps> = ({
       className="sticky left-0 z-10 bg-background shadow-sm"
       renderHeader={renderColumnHeader}
       renderActions={renderRowActions}
+      viewMode={viewMode}
     />
   );
 };
