@@ -30,6 +30,7 @@ interface TableControlsProps {
   onClearData: () => void;
   onFilterChange?: (filters: FilterOption[]) => void;
   activeFilters?: FilterOption[];
+  viewMode?: boolean;
 }
 
 const TableControls = ({ 
@@ -37,7 +38,8 @@ const TableControls = ({
   onDataChange, 
   onClearData, 
   onFilterChange,
-  activeFilters = [] 
+  activeFilters = [],
+  viewMode = false
 }: TableControlsProps) => {
   const { toast } = useToast();
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -91,6 +93,8 @@ const TableControls = ({
   };
 
   const validateAll = () => {
+    if (viewMode) return; // Prevent validation in view mode
+    
     const validatedData = validateRecords(data);
     onDataChange(validatedData);
     
@@ -120,6 +124,8 @@ const TableControls = ({
   };
 
   const lockAll = () => {
+    if (viewMode) return; // Prevent locking in view mode
+    
     const updatedData = data.map(record => ({ ...record, isLocked: true }));
     onDataChange(updatedData);
     toast({
@@ -130,6 +136,8 @@ const TableControls = ({
   };
 
   const unlockAll = () => {
+    if (viewMode) return; // Prevent unlocking in view mode
+    
     const updatedData = data.map(record => ({ ...record, isLocked: false }));
     onDataChange(updatedData);
     toast({
@@ -193,18 +201,27 @@ const TableControls = ({
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex flex-wrap gap-2">
-        <Button onClick={validateAll} variant="outline" className="flex items-center">
-          <Filter className="mr-2 h-4 w-4" />
-          Validate All
-        </Button>
-        <Button onClick={lockAll} variant="outline" className="flex items-center">
-          <Lock className="mr-2 h-4 w-4" />
-          Lock All
-        </Button>
-        <Button onClick={unlockAll} variant="outline" className="flex items-center">
-          <Unlock className="mr-2 h-4 w-4" />
-          Unlock All
-        </Button>
+        {!viewMode ? (
+          <>
+            <Button onClick={validateAll} variant="outline" className="flex items-center">
+              <Filter className="mr-2 h-4 w-4" />
+              Validate All
+            </Button>
+            <Button onClick={lockAll} variant="outline" className="flex items-center">
+              <Lock className="mr-2 h-4 w-4" />
+              Lock All
+            </Button>
+            <Button onClick={unlockAll} variant="outline" className="flex items-center">
+              <Unlock className="mr-2 h-4 w-4" />
+              Unlock All
+            </Button>
+          </>
+        ) : (
+          <div className="text-sm px-2 py-1 rounded bg-muted flex items-center">
+            <Lock className="mr-2 h-4 w-4" />
+            View Mode (Read Only)
+          </div>
+        )}
         <Button 
           onClick={() => setShowFilterPanel(!showFilterPanel)} 
           variant={activeFilters.length > 0 ? "default" : "outline"} 
@@ -217,14 +234,18 @@ const TableControls = ({
           <Download className="mr-2 h-4 w-4" />
           Export
         </Button>
-        <Button onClick={onClearData} variant="outline" className="flex items-center text-destructive hover:text-destructive">
-          <Trash className="mr-2 h-4 w-4" />
-          Clear
-        </Button>
-        <Button onClick={handleImport} className="ml-auto flex items-center">
-          <Save className="mr-2 h-4 w-4" />
-          Import
-        </Button>
+        {!viewMode && (
+          <Button onClick={onClearData} variant="outline" className="flex items-center text-destructive hover:text-destructive">
+            <Trash className="mr-2 h-4 w-4" />
+            Clear
+          </Button>
+        )}
+        {!viewMode && (
+          <Button onClick={handleImport} className="ml-auto flex items-center">
+            <Save className="mr-2 h-4 w-4" />
+            Import
+          </Button>
+        )}
       </div>
       
       {showFilterPanel && (

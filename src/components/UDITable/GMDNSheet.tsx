@@ -38,7 +38,7 @@ const GMDNSheet: React.FC<GMDNSheetProps> = ({ records }) => {
         
         <div className="border rounded-md overflow-hidden">
           <div className="h-[calc(100vh-380px)] relative">
-            <ScrollArea className="h-full" scrollHide={false} orientation="both">
+            <ScrollArea className="h-full" orientation="both">
               <GMDNSheetTable
                 selectedDevice={selectedDevice}
                 gmdnRecords={filteredGMDNRecords}

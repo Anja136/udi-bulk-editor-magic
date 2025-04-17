@@ -20,6 +20,7 @@ interface TableContainerProps {
   onApplyFilter: (column: string, value: string) => void;
   onClearFilter: (column: string) => void;
   activeFilters?: { column: string; value: string }[];
+  viewMode?: boolean;
 }
 
 const TableContainer: React.FC<TableContainerProps> = ({
@@ -36,7 +37,8 @@ const TableContainer: React.FC<TableContainerProps> = ({
   isColumnFiltered,
   onApplyFilter,
   onClearFilter,
-  activeFilters
+  activeFilters,
+  viewMode = false
 }) => {
   return (
     <div className="border rounded-md overflow-hidden">
