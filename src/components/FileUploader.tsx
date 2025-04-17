@@ -2,13 +2,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, FileCheck, AlertCircle, History, Eye, Clock } from 'lucide-react';
+import { Upload, FileCheck, AlertCircle, History, Eye, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { UDIRecord } from '@/types/udi';
 import { useToast } from '@/components/ui/use-toast';
 import { generateMockData } from '@/lib/mockData';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { validateRecords } from '@/lib/validators';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from "@/components/ui/progress";
 
 interface FileUploaderProps {
   onDataLoaded: (data: UDIRecord[]) => void;
@@ -177,9 +178,82 @@ const FileUploader = ({ onDataLoaded, onHistorySelect }: FileUploaderProps) => {
     }
   };
 
-  // Count invalid and warning records
-  const invalidRecords = uploadedRecords.filter(r => r.status === 'invalid').length;
-  const warningRecords = uploadedRecords.filter(r => r.status === 'warning').length;
+  // Render Data Validation Summary
+  const renderDataValidationSummary = (records: UDIRecord[]) => {
+    if (records.length === 0) return null;
+    
+    // Count records with errors and warnings
+    const invalidRecords = records.filter(r => r.status === 'invalid').length;
+    const warningRecords = records.filter(r => r.status === 'warning').length;
+    const validRecords = records.length - invalidRecords - warningRecords;
+    
+    // Calculate percentages for progress bar
+    const validPercentage = (validRecords / records.length) * 100;
+    const warningPercentage = (warningRecords / records.length) * 100;
+    const errorPercentage = (invalidRecords / records.length) * 100;
+    
+    return (
+      <Alert 
+        variant={invalidRecords > 0 ? "destructive" : "default"} 
+        className={invalidRecords > 0 ? "border-error" : warningRecords > 0 ? "border-warning" : "border-success"}
+      >
+        {invalidRecords > 0 ? (
+          <AlertCircle className="h-4 w-4" />
+        ) : warningRecords > 0 ? (
+          <AlertTriangle className="h-4 w-4" />
+        ) : (
+          <CheckCircle className="h-4 w-4" />
+        )}
+        
+        <AlertTitle>Data Validation Summary</AlertTitle>
+        <AlertDescription>
+          <div className="space-y-2 mt-2">
+            <div className="relative w-full h-3 bg-muted rounded-full overflow-hidden">
+              {validPercentage > 0 && (
+                <div 
+                  className="absolute h-full bg-success" 
+                  style={{ width: `${validPercentage}%`, left: '0' }}
+                />
+              )}
+              {warningPercentage > 0 && (
+                <div 
+                  className="absolute h-full bg-warning" 
+                  style={{ width: `${warningPercentage}%`, left: `${validPercentage}%` }}
+                />
+              )}
+              {errorPercentage > 0 && (
+                <div 
+                  className="absolute h-full bg-error" 
+                  style={{ width: `${errorPercentage}%`, left: `${validPercentage + warningPercentage}%` }}
+                />
+              )}
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center p-2 rounded-md bg-success/10">
+                <div className="text-sm font-medium text-success">{validRecords}</div>
+                <div className="text-xs text-success">Valid</div>
+              </div>
+              
+              <div className="text-center p-2 rounded-md bg-warning/10">
+                <div className="text-sm font-medium text-warning">{warningRecords}</div>
+                <div className="text-xs text-warning">Warnings</div>
+              </div>
+              
+              <div className="text-center p-2 rounded-md bg-error/10">
+                <div className="text-sm font-medium text-error">{invalidRecords}</div>
+                <div className="text-xs text-error">Errors</div>
+              </div>
+            </div>
+            
+            <div className="text-xs mt-1 text-muted-foreground">
+              Fields with issues are highlighted. Detailed validation is available in the Data Editor.
+            </div>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  };
 
   return (
     <Card className="w-full">
@@ -221,37 +295,7 @@ const FileUploader = ({ onDataLoaded, onHistorySelect }: FileUploaderProps) => {
 
         {uploadedRecords.length > 0 && (
           <div className="mt-4">
-            <Alert variant={invalidRecords > 0 ? "destructive" : warningRecords > 0 ? "default" : "default"}
-                  className={invalidRecords > 0 ? "border-error" : warningRecords > 0 ? "border-warning" : "border-success"}>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Validation Results</AlertTitle>
-              <AlertDescription>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  <div className="text-center p-2 rounded-md bg-background">
-                    <div className="text-lg font-bold">{uploadedRecords.length}</div>
-                    <div className="text-xs text-muted-foreground">Total Records</div>
-                  </div>
-                  {invalidRecords > 0 && (
-                    <div className="text-center p-2 rounded-md bg-error/10">
-                      <div className="text-lg font-bold text-error">{invalidRecords}</div>
-                      <div className="text-xs text-error">Errors</div>
-                    </div>
-                  )}
-                  {warningRecords > 0 && (
-                    <div className="text-center p-2 rounded-md bg-warning/10">
-                      <div className="text-lg font-bold text-warning">{warningRecords}</div>
-                      <div className="text-xs text-warning">Warnings</div>
-                    </div>
-                  )}
-                  <div className="text-center p-2 rounded-md bg-success/10">
-                    <div className="text-lg font-bold text-success">
-                      {uploadedRecords.length - invalidRecords - warningRecords}
-                    </div>
-                    <div className="text-xs text-success">Valid</div>
-                  </div>
-                </div>
-              </AlertDescription>
-            </Alert>
+            {renderDataValidationSummary(uploadedRecords)}
           </div>
         )}
 
@@ -316,6 +360,9 @@ const FileUploader = ({ onDataLoaded, onHistorySelect }: FileUploaderProps) => {
                       <div>{item.recordCount} records</div>
                       {item.invalidCount > 0 && (
                         <div className="text-error">{item.invalidCount} errors</div>
+                      )}
+                      {item.warningCount > 0 && (
+                        <div className="text-warning">{item.warningCount} warnings</div>
                       )}
                     </div>
                     <Button size="sm" variant="ghost" className="h-8 w-8 p-0">

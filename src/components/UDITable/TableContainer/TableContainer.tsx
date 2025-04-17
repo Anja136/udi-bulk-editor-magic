@@ -44,7 +44,7 @@ const TableContainer: React.FC<TableContainerProps> = ({
     <div className="border rounded-md overflow-hidden">
       <div className="h-[calc(100vh-400px)] relative">
         <ScrollArea className="h-full" orientation="both">
-          <div className="flex flex-row w-full min-w-full">
+          <div className="flex flex-row w-full min-w-max">
             <FrozenColumns
               columns={frozenColumns}
               records={records}
