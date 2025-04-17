@@ -21,6 +21,7 @@ interface TableContentProps {
   className?: string;
   renderHeader?: (column: UDITableColumn) => React.ReactNode;
   renderActions?: (record: UDIRecord) => React.ReactNode;
+  viewMode?: boolean;
 }
 
 const TableContent: React.FC<TableContentProps> = ({
@@ -38,7 +39,8 @@ const TableContent: React.FC<TableContentProps> = ({
   activeFilters,
   className,
   renderHeader,
-  renderActions
+  renderActions,
+  viewMode = false
 }) => {
   // Helper function to determine if a cell has errors or warnings
   const getCellErrorStatus = (record: UDIRecord, column: string) => {
