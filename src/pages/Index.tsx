@@ -1,7 +1,8 @@
 
 import { useState, useMemo } from 'react';
 import { UDIRecord } from '@/types/udi';
-import FileUploader, { UploadHistory } from '@/components/FileUploader';
+import FileUploader from '@/components/FileUploader'; // Updated import path
+import { UploadHistory } from '@/components/FileUploader/types'; // Updated import path
 import UDIDataTable from '@/components/UDIDataTable';
 import TableControls from '@/components/TableControls';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
