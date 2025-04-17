@@ -4,6 +4,7 @@ import { UDIRecord, UDITableColumn } from '@/types/udi';
 import RowActions from './RowActions';
 import TableContent from './TableContent';
 import ColumnFilter from './ColumnFilter';
+import EditableCell from './EditableCell';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface FrozenColumnsProps {
